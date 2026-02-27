@@ -1,0 +1,20 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sah and Sons Group mark">
+  <defs>
+    <linearGradient id="ring" x1="17" y1="14" x2="103" y2="103" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5A0C20"/>
+      <stop offset="1" stop-color="#B31D33"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="40" y1="28" x2="77" y2="87" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFD67A"/>
+      <stop offset="1" stop-color="#D4942E"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="60" cy="60" r="43" fill="url(#ring)"/>
+  <circle cx="60" cy="60" r="42.5" stroke="#3C0816" stroke-opacity="0.28"/>
+
+  <path d="M60 24.5L65.5 39.4H81.1L68.4 48.9L73.1 63.8L60 54L46.9 63.8L51.6 48.9L38.9 39.4H54.5L60 24.5Z" fill="#FEE7A8"/>
+  <path d="M60 37.1C71.1 37.1 80.1 46.1 80.1 57.2C80.1 68.3 71.1 77.3 60 77.3C48.9 77.3 39.9 68.3 39.9 57.2C39.9 46.1 48.9 37.1 60 37.1Z" fill="url(#gold)" fill-opacity="0.16"/>
+  <path d="M75.2 46.7C71.8 43 66.8 40.8 60.3 40.8C52 40.8 45.8 45.1 45.8 51C45.8 56.1 49.9 59 58 60.6C65.9 62.2 68.6 63.6 68.6 66.6C68.6 69.8 65.3 72 59.8 72C55 72 50.8 70.3 47.2 67.1L42.8 71.5C47.1 75.6 52.8 78.1 59.8 78.1C69.2 78.1 75.4 73.6 75.4 66.9C75.4 61.3 71.8 58.3 62.5 56.3C55.6 54.8 52.3 53.7 52.3 50.8C52.3 47.7 55.3 45.8 60.4 45.8C64.6 45.8 68 47.2 71 50L75.2 46.7Z" fill="#FFEFC3"/>
+  <path d="M32 85.3C40.7 78.6 50.6 75.2 60 75.2C69.4 75.2 79.3 78.6 88 85.3" stroke="#DFA242" stroke-width="4.5" stroke-linecap="round"/>
+</svg>

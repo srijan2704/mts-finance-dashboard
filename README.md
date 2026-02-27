@@ -9,7 +9,7 @@ Vanilla JavaScript UI for `mts-purchase-service`.
 - Chart.js via CDN
 
 ## Features included
-- Login page (supports initial credential setup + login)
+- Login page (username/password login)
 - Landing page
   - Create purchase order
   - Product -> variant filtering
@@ -41,12 +41,33 @@ cd mts-finance-dashboard
 npx serve .
 ```
 
-## Backend requirement
-Spring Boot backend should be running on:
-- `http://localhost:8080`
+## Backend environment switching
+Frontend backend host is resolved using `assets/js/runtime-config.js`.
 
-If backend runs on different host/port, update:
-- `assets/js/api/endpoints.js` (`API_BASE`)
+```js
+window.__MTS_ENV__ = "dev"; // dev -> localhost, prod -> Render
+```
+
+Mapped URLs:
+- `dev` -> `http://localhost:8080`
+- `prod` -> `https://mts-purchase-service-1.onrender.com`
+
+## Deploy on Render (Static Site)
+Use **Static Site** (not Web Service).
+
+Render settings:
+- Service Type: `Static Site`
+- Root Directory: repo root (`mts-finance-dashboard`)
+- Build Command: *(leave empty)*
+- Publish Directory: `.`
+
+Before deploy:
+1. Set `window.__MTS_ENV__ = "prod"` in `assets/js/runtime-config.js`.
+2. Commit and push.
+
+After deploy:
+1. Open the Render URL.
+2. Hard refresh once to avoid cached JS/CSS (`Cmd+Shift+R`).
 
 ## Auth notes
 - UI uses `/api/auth/login` token response.

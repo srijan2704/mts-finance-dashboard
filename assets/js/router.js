@@ -1,5 +1,5 @@
 import { getAuth } from "./state/store.js";
-import { renderNavbar, bindNavbarHandlers } from "./components/navbar.js";
+import { renderNavbar, renderSidebar, bindNavbarHandlers } from "./components/navbar.js";
 import { renderLoginPage, bindLoginPage } from "./pages/login.js";
 import { mountLandingPage } from "./pages/landing.js";
 import { mountMaintenancePage } from "./pages/maintenance.js";
@@ -10,8 +10,13 @@ let currentView = null;
 function appShell(content, hash) {
   return `
     <div class="app-shell">
-      ${renderNavbar(hash)}
-      <div id="route-root">${content}</div>
+      <div class="dashboard-shell">
+        ${renderSidebar(hash)}
+        <main class="main-panel">
+          ${renderNavbar(hash)}
+          <div id="route-root">${content}</div>
+        </main>
+      </div>
     </div>
   `;
 }

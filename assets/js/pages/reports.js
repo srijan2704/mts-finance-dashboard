@@ -30,11 +30,6 @@ function renderReportsPage() {
   return `
     <div class="page-grid">
       <section class="card">
-        <h2>Reporting Dashboard</h2>
-        <p class="muted">All reports include confirmed purchase orders only.</p>
-      </section>
-
-      <section class="card">
         <div class="section-title"><h3>Graph 1: Daily Purchase Trend</h3></div>
         <form id="trend1-form" class="form-grid-2">
           <div><label class="label">From</label><input class="input" type="date" name="from" /></div>
