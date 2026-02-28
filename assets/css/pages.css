@@ -275,3 +275,30 @@
     padding: 10px;
   }
 }
+
+.login-register-wrap {
+  margin-top: 14px;
+  border-top: 1px solid #e4e9f2;
+  padding-top: 12px;
+}
+
+.login-register-wrap summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: #20436f;
+  margin-bottom: 10px;
+}
+
+.login-register-grid {
+  margin-top: 10px;
+}
+
+.login-register-help {
+  margin-top: 10px;
+  color: #5f6a7c;
+  font-size: 12px;
+}
+
+.hidden {
+  display: none !important;
+}

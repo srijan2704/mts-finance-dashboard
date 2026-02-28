@@ -78,6 +78,8 @@ export const API_BASE = queryOverride || runtimeOverride || storageOverride || e
 export const endpoints = {
   auth: {
     setup: "/api/auth/setup",
+    registerRequestOtp: "/api/auth/register/request-otp",
+    registerVerifyOtp: "/api/auth/register/verify-otp",
     login: "/api/auth/login",
     me: "/api/auth/me",
     logout: "/api/auth/logout",
