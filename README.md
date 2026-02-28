@@ -45,11 +45,12 @@ npx serve .
 Frontend backend host is resolved using `assets/js/runtime-config.js`.
 
 ```js
-window.__MTS_ENV__ = "dev"; // dev -> localhost, prod -> Render
+window.__MTS_ENV__ = "uat"; // dev -> localhost, uat -> Render UAT, prod -> Render Prod
 ```
 
 Mapped URLs:
 - `dev` -> `http://localhost:8080`
+- `uat` -> `https://mts-purchase-service-uat.onrender.com`
 - `prod` -> `https://mts-purchase-service-1.onrender.com`
 
 ## Deploy on Render (Static Site)
@@ -62,7 +63,7 @@ Render settings:
 - Publish Directory: `.`
 
 Before deploy:
-1. Set `window.__MTS_ENV__ = "prod"` in `assets/js/runtime-config.js`.
+1. Set `window.__MTS_ENV__ = "uat"` for UAT (or `"prod"` for production) in `assets/js/runtime-config.js`.
 2. Commit and push.
 
 After deploy:

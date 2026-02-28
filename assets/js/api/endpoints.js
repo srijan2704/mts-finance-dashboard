@@ -3,11 +3,11 @@
  *   0) URL query param: ?apiBase=https://example.com
  *   1) window.__MTS_API_BASE__
  *   2) localStorage key "mtsApiBase"
- *   3) Environment mapping from env value (dev/prod)
+ *   3) Environment mapping from env value (dev/uat/prod)
  *   4) Hostname inference fallback
  *
  * Environment resolution priority:
- *   0) URL query param: ?env=dev|prod
+ *   0) URL query param: ?env=dev|uat|prod
  *   1) window.__MTS_ENV__
  *   2) localStorage key "mtsEnv"
  */
@@ -24,7 +24,7 @@ const storageOverride = typeof window !== "undefined" ? window.localStorage?.get
 
 const normalizedEnv = (value) => {
   const env = String(value || "").trim().toLowerCase();
-  return env === "dev" || env === "prod" ? env : null;
+  return env === "dev" || env === "uat" || env === "prod" ? env : null;
 };
 
 const queryEnv = normalizedEnv(queryParams?.get("env"));
@@ -35,6 +35,7 @@ export const API_ENV = queryEnv || runtimeEnv || storageEnv || null;
 
 const defaultEnvBases = {
   dev: "http://localhost:8080",
+  uat: "https://mts-purchase-service-uat.onrender.com",
   prod: "https://mts-purchase-service-1.onrender.com",
 };
 
@@ -45,6 +46,7 @@ const configuredEnvBases = (() => {
 
   return {
     dev: window.__MTS_API_BASES__.dev || defaultEnvBases.dev,
+    uat: window.__MTS_API_BASES__.uat || defaultEnvBases.uat,
     prod: window.__MTS_API_BASES__.prod || defaultEnvBases.prod,
   };
 })();
@@ -61,6 +63,9 @@ const inferredApiBase = (() => {
   }
 
   if (host.endsWith("onrender.com")) {
+    if (host.includes("-uat")) {
+      return defaultEnvBases.uat;
+    }
     return defaultEnvBases.prod;
   }
 
