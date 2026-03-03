@@ -12,6 +12,6 @@ window.__MTS_ENV__ = "uat";
 
 window.__MTS_API_BASES__ = {
   dev: "http://localhost:8080",
-  uat: "/api",
+  uat: "",
   prod: "https://mts-purchase-service-1.onrender.com",
 };
