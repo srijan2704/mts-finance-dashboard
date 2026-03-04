@@ -35,7 +35,7 @@ export const API_ENV = queryEnv || runtimeEnv || storageEnv || null;
 
 const defaultEnvBases = {
   dev: "http://localhost:8080",
-  uat: "https://mts-purchase-service-uat.onrender.com",
+  uat: "",
   prod: "https://mts-purchase-service-1.onrender.com",
 };
 
