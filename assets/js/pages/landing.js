@@ -1,7 +1,7 @@
 import { apiFetch, withQuery } from "../api/client.js";
 import { endpoints } from "../api/endpoints.js";
 import { showToast } from "../components/toast.js";
-import { eachDate, escapeHtml, monthStartAndEnd, statusBadge } from "../utils.js";
+import { escapeHtml, monthStartAndEnd, statusBadge } from "../utils.js";
 
 let sellers = [];
 let products = [];
@@ -42,14 +42,16 @@ async function loadMasters() {
   products = productRes.data || [];
 }
 
-/** Loads all orders for current month to show purchase history table. */
+/** Loads all orders for current month using one date-range API call. */
 async function loadCurrentMonthHistory() {
   const month = monthStartAndEnd(new Date());
-  const dates = eachDate(month.start, month.end);
-  const responses = await Promise.all(
-    dates.map((date) => apiFetch(withQuery(endpoints.purchaseOrders, { date })).catch(() => ({ data: [] }))),
-  );
-  orderHistory = responses.flatMap((x) => x.data || []);
+  const response = await apiFetch(withQuery(endpoints.purchaseOrders, {
+    fromDate: month.start,
+    toDate: month.end,
+  }));
+  orderHistory = response.data || [];
+
+  // Extra safeguard sort in case backend sort changes in future.
   orderHistory.sort((a, b) => String(b.orderDate).localeCompare(String(a.orderDate)));
 }
 
