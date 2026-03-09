@@ -1,37 +1,19 @@
 /**
- * API base URL resolution priority:
- *   0) URL query param: ?apiBase=https://example.com
- *   1) window.__MTS_API_BASE__
- *   2) localStorage key "mtsApiBase"
- *   3) Environment mapping from env value (dev/uat/prod)
- *   4) Hostname inference fallback
- *
- * Environment resolution priority:
- *   0) URL query param: ?env=dev|uat|prod
- *   1) window.__MTS_ENV__
- *   2) localStorage key "mtsEnv"
+ * API base URL resolution policy:
+ * - Runtime config (`runtime-config.js`) controls environment and API base.
+ * - URL query/localStorage overrides are intentionally disabled to prevent credential/token exfiltration.
  */
-const queryParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
-
-const queryOverride = (() => {
-  if (!queryParams) return null;
-  const value = queryParams.get("apiBase");
-  return value && value.trim() ? value.trim() : null;
-})();
-
-const runtimeOverride = typeof window !== "undefined" ? window.__MTS_API_BASE__ : null;
-const storageOverride = typeof window !== "undefined" ? window.localStorage?.getItem("mtsApiBase") : null;
+const hasWindow = typeof window !== "undefined";
+const host = hasWindow ? (window.location.hostname || "localhost") : "localhost";
+const isLocalHost = host === "localhost" || host === "127.0.0.1";
 
 const normalizedEnv = (value) => {
   const env = String(value || "").trim().toLowerCase();
   return env === "dev" || env === "uat" || env === "prod" ? env : null;
 };
 
-const queryEnv = normalizedEnv(queryParams?.get("env"));
-const runtimeEnv = normalizedEnv(typeof window !== "undefined" ? window.__MTS_ENV__ : null);
-const storageEnv = normalizedEnv(typeof window !== "undefined" ? window.localStorage?.getItem("mtsEnv") : null);
-
-export const API_ENV = queryEnv || runtimeEnv || storageEnv || null;
+const runtimeEnv = normalizedEnv(hasWindow ? window.__MTS_ENV__ : null);
+export const API_ENV = runtimeEnv || (isLocalHost ? "dev" : null);
 
 const defaultEnvBases = {
   dev: "http://localhost:8080",
@@ -40,7 +22,7 @@ const defaultEnvBases = {
 };
 
 const configuredEnvBases = (() => {
-  if (typeof window === "undefined" || typeof window.__MTS_API_BASES__ !== "object" || window.__MTS_API_BASES__ === null) {
+  if (!hasWindow || typeof window.__MTS_API_BASES__ !== "object" || window.__MTS_API_BASES__ === null) {
     return defaultEnvBases;
   }
 
@@ -51,14 +33,49 @@ const configuredEnvBases = (() => {
   };
 })();
 
-const envMappedBase = API_ENV ? configuredEnvBases[API_ENV] : null;
+const normalizeApiBase = (value) => {
+  if (value === null || value === undefined) return null;
 
-const inferredApiBase = (() => {
-  if (typeof window === "undefined") return defaultEnvBases.dev;
+  const trimmed = String(value).trim();
+  if (!trimmed) return "";
 
-  const host = window.location.hostname || "localhost";
+  // Support same-origin base-path deployments.
+  if (trimmed.startsWith("/")) {
+    return trimmed.replace(/\/+$/, "");
+  }
 
-  if (host === "localhost" || host === "127.0.0.1") {
+  try {
+    const url = new URL(trimmed);
+    const protocol = url.protocol.toLowerCase();
+
+    if (protocol === "https:") {
+      return url.origin;
+    }
+
+    // HTTP is allowed only for localhost development.
+    if (
+      protocol === "http:" &&
+      isLocalHost &&
+      (url.hostname === "localhost" || url.hostname === "127.0.0.1")
+    ) {
+      return url.origin;
+    }
+
+    return null;
+  } catch (_) {
+    return null;
+  }
+};
+
+const runtimeOverride = hasWindow ? window.__MTS_API_BASE__ : null;
+const manualOverride = normalizeApiBase(runtimeOverride);
+
+const envMappedBase = normalizeApiBase(API_ENV ? configuredEnvBases[API_ENV] : null);
+
+const inferredApiBase = () => {
+  if (!hasWindow) return defaultEnvBases.dev;
+
+  if (isLocalHost) {
     return defaultEnvBases.dev;
   }
 
@@ -69,11 +86,16 @@ const inferredApiBase = (() => {
     return defaultEnvBases.prod;
   }
 
-  // Mobile/WiFi local testing fallback.
-  return `http://${host}:8080`;
-})();
+  // Deployed frontend/backend on same host should use relative /api routes.
+  return "";
+};
 
-export const API_BASE = queryOverride || runtimeOverride || storageOverride || envMappedBase || inferredApiBase;
+const inferredBase = normalizeApiBase(inferredApiBase());
+const resolvedBase = [manualOverride, envMappedBase, inferredBase].find(
+  (value) => value !== null && value !== undefined
+);
+
+export const API_BASE = resolvedBase ?? "";
 
 export const endpoints = {
   auth: {

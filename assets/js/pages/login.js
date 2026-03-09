@@ -63,6 +63,7 @@ function bindLoginPage() {
   const loginForm = document.getElementById("login-form");
   const loginPasswordInput = document.getElementById("password");
   const loginShowPasswordCheckbox = document.getElementById("login-show-password");
+  const registerPasswordInput = document.getElementById("register-password");
   const registerRequestForm = document.getElementById("register-request-form");
   const registerVerifyForm = document.getElementById("register-verify-form");
   const verifyUsernameInput = document.getElementById("verify-username");
@@ -101,6 +102,15 @@ function bindLoginPage() {
         window.location.hash = "#/landing";
       } catch (err) {
         showToast(err.message || "Login failed", "error");
+      } finally {
+        payload.password = "";
+        if (loginPasswordInput) {
+          loginPasswordInput.value = "";
+          loginPasswordInput.type = "password";
+        }
+        if (loginShowPasswordCheckbox) {
+          loginShowPasswordCheckbox.checked = false;
+        }
       }
     });
   }
@@ -132,6 +142,12 @@ function bindLoginPage() {
         showToast("OTP sent successfully");
       } catch (err) {
         showToast(err.message || "Failed to send OTP", "error");
+      } finally {
+        payload.password = "";
+        if (registerPasswordInput) {
+          registerPasswordInput.value = "";
+          registerPasswordInput.type = "password";
+        }
       }
     });
 
