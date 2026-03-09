@@ -1,0 +1,74 @@
+name: Deploy Frontend To EC2
+
+on:
+  workflow_dispatch:
+    inputs:
+      validate_nginx:
+        description: "Validate nginx config before restart"
+        required: true
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ec2-frontend-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy Frontend On EC2
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH
+        env:
+          EC2_SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          EC2_KNOWN_HOSTS: ${{ secrets.EC2_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          CLEAN_KEY="$(printf '%s' "$EC2_SSH_PRIVATE_KEY" | tr -d '\r')"
+          CLEAN_KNOWN_HOSTS="$(printf '%s' "$EC2_KNOWN_HOSTS" | tr -d '\r')"
+
+          printf '%s\n' "$CLEAN_KEY" > ~/.ssh/ec2_key
+          chmod 600 ~/.ssh/ec2_key
+          printf '%s\n' "$CLEAN_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+          ssh-keygen -y -f ~/.ssh/ec2_key > /dev/null
+
+      - name: Deploy
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          INPUT_VALIDATE_NGINX: ${{ github.event.inputs.validate_nginx || 'true' }}
+        run: |
+          set -euo pipefail
+
+          tar --exclude='.git' --exclude='.github' --exclude='.env' \
+            -czf /tmp/mts-finance-dashboard-src.tgz .
+          scp -i ~/.ssh/ec2_key -o IdentitiesOnly=yes /tmp/mts-finance-dashboard-src.tgz \
+            "${EC2_USER}@${EC2_HOST}:/tmp/mts-finance-dashboard-src.tgz"
+
+          scp -i ~/.ssh/ec2_key -o IdentitiesOnly=yes ./scripts/ec2-deploy-frontend.sh \
+            "${EC2_USER}@${EC2_HOST}:/tmp/ec2-deploy-frontend.sh"
+
+          ssh -i ~/.ssh/ec2_key -o IdentitiesOnly=yes "${EC2_USER}@${EC2_HOST}" \
+            "set -euo pipefail; \
+             TMP_SYNC_DIR=\$(mktemp -d); \
+             mkdir -p /opt/mts-finance-dashboard; \
+             tar -xzf /tmp/mts-finance-dashboard-src.tgz -C \"\$TMP_SYNC_DIR\"; \
+             rsync -a --delete --exclude '.git/' --exclude '.env' \"\$TMP_SYNC_DIR/\" /opt/mts-finance-dashboard/; \
+             rm -rf \"\$TMP_SYNC_DIR\"; \
+             chmod +x /tmp/ec2-deploy-frontend.sh; \
+             FRONTEND_GIT_SYNC=false VALIDATE_NGINX=\"$INPUT_VALIDATE_NGINX\" /tmp/ec2-deploy-frontend.sh"
