@@ -253,6 +253,50 @@
   justify-content: flex-end;
 }
 
+.select-search-modal-card {
+  width: min(560px, 96vw);
+}
+
+.select-search-modal-input {
+  margin-bottom: 10px;
+}
+
+.select-search-list {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  max-height: 48vh;
+  overflow: auto;
+}
+
+.select-search-option {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: var(--ink);
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.select-search-option:last-child {
+  border-bottom: 0;
+}
+
+.select-search-option:hover,
+.select-search-option:focus-visible {
+  background: #eef4ff;
+  outline: none;
+}
+
+.select-search-option.active {
+  background: var(--brand-soft);
+  color: #0f4f9e;
+  font-weight: 700;
+}
+
 @media (max-width: 1200px) {
   .landing-top-grid {
     grid-template-columns: 1fr;
@@ -315,6 +359,14 @@
 
   .submit-confirm-actions .btn {
     width: 100%;
+  }
+
+  .select-search-modal-card {
+    width: min(100%, 560px);
+  }
+
+  .select-search-list {
+    max-height: 56vh;
   }
 
   .item-row {

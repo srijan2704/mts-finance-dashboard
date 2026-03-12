@@ -8,6 +8,7 @@ let products = [];
 let lineItems = [];
 let orderHistory = [];
 let monthlyTypeChart = null;
+let activeSelectSearchModal = null;
 
 const initialFormState = () => ({
   sellerId: "",
@@ -412,80 +413,126 @@ function normalizeSearchText(value) {
   return String(value || "").trim().toLowerCase();
 }
 
-/** Hides non-matching options inside a select for in-dropdown type search. */
-function applySelectFilter(select, rawQuery) {
+/** Closes searchable dropdown modal used by create-order selects. */
+function closeSelectSearchModal() {
+  if (!activeSelectSearchModal) return;
+  activeSelectSearchModal.remove();
+  activeSelectSearchModal = null;
+}
+
+/** Opens centered searchable dropdown modal for one select control. */
+function openSelectSearchModal(select) {
   if (!select) return;
+  closeSelectSearchModal();
 
-  const query = normalizeSearchText(rawQuery);
+  const label = select.closest("div")?.querySelector(".label")?.textContent?.trim() || "Value";
+  const optionData = Array.from(select.options)
+    .filter((option) => !option.disabled)
+    .map((option) => ({
+      value: String(option.value || ""),
+      label: String(option.textContent || "").trim(),
+    }));
 
-  Array.from(select.options).forEach((option, index) => {
-    if (index === 0) {
-      option.hidden = false;
+  const selectedValue = String(select.value || "");
+  const modal = document.createElement("div");
+  modal.id = "select-search-modal";
+  modal.className = "modal-backdrop";
+  modal.innerHTML = `
+    <div class="modal-card select-search-modal-card" role="dialog" aria-modal="true" aria-label="${escapeHtml(label)} options">
+      <div class="section-title">
+        <h3>${escapeHtml(label)}</h3>
+        <button class="btn btn-secondary select-search-close" type="button">Close</button>
+      </div>
+      <input class="input select-search-modal-input" type="text" placeholder="Search ${escapeHtml(label.toLowerCase())}" autocomplete="off" />
+      <div class="select-search-list"></div>
+    </div>
+  `;
+
+  const modalHost = document.getElementById("modal-host") || document.body;
+  modalHost.append(modal);
+  activeSelectSearchModal = modal;
+
+  const searchInput = modal.querySelector(".select-search-modal-input");
+  const listWrap = modal.querySelector(".select-search-list");
+
+  function renderOptions(rawQuery) {
+    if (!listWrap) return;
+    const query = normalizeSearchText(rawQuery);
+    const filtered = optionData.filter((item) => normalizeSearchText(item.label).includes(query));
+
+    if (!filtered.length) {
+      listWrap.innerHTML = '<p class="muted" style="padding:10px 12px;margin:0">No matching items found.</p>';
       return;
     }
 
-    const optionText = normalizeSearchText(option.textContent);
-    option.hidden = query.length > 0 && !optionText.includes(query);
+    listWrap.innerHTML = filtered
+      .map((item) => `
+        <button class="select-search-option ${item.value === selectedValue ? "active" : ""}" type="button" data-value="${escapeHtml(item.value)}">
+          ${escapeHtml(item.label)}
+        </button>
+      `)
+      .join("");
+  }
+
+  renderOptions("");
+  requestAnimationFrame(() => searchInput?.focus());
+
+  searchInput?.addEventListener("input", (event) => {
+    renderOptions(event.target.value || "");
   });
-}
 
-/** Resets dropdown filter and makes all options visible. */
-function clearSelectFilter(select) {
-  applySelectFilter(select, "");
-}
-
-/** Enables type-to-search directly on dropdown items (no separate input field). */
-function bindSelectTypeSearch(select) {
-  if (!select || select.dataset.typeSearchBound === "true") return;
-  select.dataset.typeSearchBound = "true";
-
-  let query = "";
-  let lastTypedAt = 0;
-  const resetDelayMs = 800;
-
-  select.addEventListener("keydown", (event) => {
-    if (event.ctrlKey || event.metaKey || event.altKey) return;
-
-    if (event.key === "Backspace") {
-      event.preventDefault();
-      query = query.slice(0, -1);
-      applySelectFilter(select, query);
-      return;
-    }
-
-    if (event.key === "Escape") {
-      event.preventDefault();
-      query = "";
-      clearSelectFilter(select);
-      return;
-    }
-
-    if (event.key.length !== 1) return;
-
+  searchInput?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    const firstOption = modal.querySelector(".select-search-option");
+    if (!firstOption) return;
     event.preventDefault();
-    const now = Date.now();
-    if (now - lastTypedAt > resetDelayMs) {
-      query = "";
-    }
-    query += event.key;
-    lastTypedAt = now;
-    applySelectFilter(select, query);
+    firstOption.click();
   });
 
-  const resetFilter = () => {
-    query = "";
-    clearSelectFilter(select);
+  listWrap?.addEventListener("click", (event) => {
+    const optionBtn = event.target.closest(".select-search-option");
+    if (!optionBtn) return;
+    const selectedOptionValue = optionBtn.dataset.value || "";
+    if (String(select.value || "") !== selectedOptionValue) {
+      select.value = selectedOptionValue;
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+    closeSelectSearchModal();
+    select.focus();
+  });
+
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal || event.target.closest(".select-search-close")) {
+      closeSelectSearchModal();
+      select.focus();
+    }
+  });
+}
+
+/** Binds searchable modal behavior to one select control. */
+function bindSearchableDropdown(select) {
+  if (!select || select.dataset.searchableDropdownBound === "true") return;
+  select.dataset.searchableDropdownBound = "true";
+
+  const open = (event) => {
+    event.preventDefault();
+    openSelectSearchModal(select);
   };
 
-  select.addEventListener("blur", resetFilter);
-  select.addEventListener("change", resetFilter);
+  select.addEventListener("mousedown", open);
+  select.addEventListener("touchstart", open, { passive: false });
+  select.addEventListener("keydown", (event) => {
+    if (!["Enter", " ", "ArrowDown", "ArrowUp"].includes(event.key)) return;
+    event.preventDefault();
+    openSelectSearchModal(select);
+  });
 }
 
-/** Binds in-dropdown search for top create-order dropdowns. */
-function bindCreateOrderDropdownTypeSearch() {
-  bindSelectTypeSearch(document.getElementById("po-seller"));
+/** Binds searchable dropdown modal for create-order form controls. */
+function bindCreateOrderDropdownSearch() {
+  bindSearchableDropdown(document.getElementById("po-seller"));
   document.querySelectorAll("#line-items-wrap .item-product, #line-items-wrap .item-variant")
-    .forEach((select) => bindSelectTypeSearch(select));
+    .forEach((select) => bindSearchableDropdown(select));
 }
 
 /** Handles product selection and loads variants for that product. */
@@ -517,7 +564,7 @@ function redrawLineItems(wrapId, items) {
   const wrap = document.getElementById(wrapId);
   if (!wrap) return;
   wrap.innerHTML = items.map((item, idx) => buildLineItemRow(item, idx)).join("");
-  bindCreateOrderDropdownTypeSearch();
+  bindCreateOrderDropdownSearch();
 }
 
 /** Creates purchase/update payload from form state + selected line items. */
@@ -837,6 +884,11 @@ function bindPostSubmitModalEvents() {
 function handleLandingModalEscape(event) {
   if (event.key !== "Escape") return;
 
+  if (activeSelectSearchModal) {
+    closeSelectSearchModal();
+    return;
+  }
+
   if (postSubmitModalState && !postSubmitModalState.loading) {
     closePostSubmitModal();
     return;
@@ -865,7 +917,7 @@ function bindLandingPage() {
   bindLineItemEvents("line-items-wrap", lineItems, () => {
     redrawLineItems("line-items-wrap", lineItems);
   });
-  bindCreateOrderDropdownTypeSearch();
+  bindCreateOrderDropdownSearch();
 
   bindEditModalEvents();
   bindPostSubmitModalEvents();
@@ -875,6 +927,7 @@ function bindLandingPage() {
 
 /** Full rerender for initial mount and full data refresh cases. */
 function rerender() {
+  closeSelectSearchModal();
   const root = document.getElementById("route-root");
   root.innerHTML = renderLandingPage();
   bindLandingPage();
