@@ -26,10 +26,12 @@ const configuredEnvBases = (() => {
     return defaultEnvBases;
   }
 
+  const hasOwn = (key) => Object.prototype.hasOwnProperty.call(window.__MTS_API_BASES__, key);
   return {
-    dev: window.__MTS_API_BASES__.dev || defaultEnvBases.dev,
-    uat: window.__MTS_API_BASES__.uat || defaultEnvBases.uat,
-    prod: window.__MTS_API_BASES__.prod || defaultEnvBases.prod,
+    // Preserve explicit empty-string values so deployed apps can enforce same-origin /api calls.
+    dev: hasOwn("dev") ? window.__MTS_API_BASES__.dev : defaultEnvBases.dev,
+    uat: hasOwn("uat") ? window.__MTS_API_BASES__.uat : defaultEnvBases.uat,
+    prod: hasOwn("prod") ? window.__MTS_API_BASES__.prod : defaultEnvBases.prod,
   };
 })();
 
