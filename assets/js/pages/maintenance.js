@@ -161,6 +161,11 @@ function renderVariantsModal() {
   const loading = variantsModalState.loading === true;
   const error = variantsModalState.error ? escapeHtml(variantsModalState.error) : "";
   const variants = Array.isArray(variantsModalState.variants) ? variantsModalState.variants : [];
+  const uniqueUnitCount = new Set(
+    variants
+      .map((v) => String(v.unitName || "").trim())
+      .filter((name) => name.length > 0)
+  ).size;
 
   const body = (() => {
     if (loading) {
@@ -209,6 +214,9 @@ function renderVariantsModal() {
         <div class="section-title">
           <h3 id="product-variants-modal-title">Variants: ${title}</h3>
           <button class="btn btn-secondary" id="product-variants-modal-close" type="button">Close</button>
+        </div>
+        <div class="variant-modal-summary muted">
+          ${loading ? "Loading variant summary..." : `Total variants: ${variants.length} | Units covered: ${uniqueUnitCount}`}
         </div>
         ${body}
       </div>

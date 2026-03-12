@@ -235,6 +235,12 @@
   min-width: 620px;
 }
 
+.variant-modal-summary {
+  margin: 2px 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 @media (max-width: 1200px) {
   .landing-top-grid {
     grid-template-columns: 1fr;
