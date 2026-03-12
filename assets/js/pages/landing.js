@@ -14,7 +14,6 @@ const initialFormState = () => ({
   orderDate: new Date().toISOString().slice(0, 10),
   invoiceNumber: "",
   remarks: "",
-  sellerSearch: "",
 });
 
 let formState = initialFormState();
@@ -26,8 +25,6 @@ function createEmptyLineItem() {
   return {
     productId: "",
     variantId: "",
-    productSearch: "",
-    variantSearch: "",
     variants: [],
     unitName: "",
     quantity: "",
@@ -95,12 +92,10 @@ function buildLineItemRow(item, index) {
       <div class="form-grid">
         <div>
           <label class="label">Product</label>
-          <input class="input select-search item-product-search" type="search" placeholder="Search product" value="${escapeHtml(item.productSearch || "")}" />
           <select class="select item-product">${productOptions(item)}</select>
         </div>
         <div>
           <label class="label">Variant</label>
-          <input class="input select-search item-variant-search" type="search" placeholder="Search variant" value="${escapeHtml(item.variantSearch || "")}" />
           <select class="select item-variant">${variantOptions(item)}</select>
         </div>
         <div>
@@ -272,7 +267,6 @@ function renderLandingPage() {
             <div class="form-grid">
               <div>
                 <label class="label">Seller</label>
-                <input class="input select-search" id="po-seller-search" type="search" placeholder="Search seller" value="${escapeHtml(formState.sellerSearch || "")}" />
                 <select class="select" id="po-seller" required>${sellerOptions(formState.sellerId)}</select>
               </div>
               <div>
@@ -411,7 +405,6 @@ function syncMainFormState() {
   formState.orderDate = document.getElementById("po-date")?.value || "";
   formState.invoiceNumber = document.getElementById("po-invoice")?.value || "";
   formState.remarks = document.getElementById("po-remarks")?.value || "";
-  formState.sellerSearch = document.getElementById("po-seller-search")?.value || "";
 }
 
 /** Normalizes option text for case-insensitive dropdown filtering. */
@@ -419,15 +412,14 @@ function normalizeSearchText(value) {
   return String(value || "").trim().toLowerCase();
 }
 
-/** Hides non-matching options inside a select while keeping current value intact. */
+/** Hides non-matching options inside a select for in-dropdown type search. */
 function applySelectFilter(select, rawQuery) {
   if (!select) return;
 
   const query = normalizeSearchText(rawQuery);
-  const selectedValue = String(select.value || "");
 
   Array.from(select.options).forEach((option, index) => {
-    if (index === 0 || String(option.value || "") === selectedValue) {
+    if (index === 0) {
       option.hidden = false;
       return;
     }
@@ -437,32 +429,63 @@ function applySelectFilter(select, rawQuery) {
   });
 }
 
-/** Applies saved product/variant search filters to all rendered line-item selects. */
-function applyLineItemSelectFilters(wrapId, items) {
-  const wrap = document.getElementById(wrapId);
-  if (!wrap) return;
-
-  wrap.querySelectorAll(".item-row").forEach((row) => {
-    const index = Number(row.dataset.index);
-    const item = items[index];
-    if (!item) return;
-
-    applySelectFilter(row.querySelector(".item-product"), item.productSearch || "");
-    applySelectFilter(row.querySelector(".item-variant"), item.variantSearch || "");
-  });
+/** Resets dropdown filter and makes all options visible. */
+function clearSelectFilter(select) {
+  applySelectFilter(select, "");
 }
 
-/** Binds seller search input and applies filtering to seller select. */
-function bindSellerSearch() {
-  const searchInput = document.getElementById("po-seller-search");
-  const sellerSelect = document.getElementById("po-seller");
-  if (!searchInput || !sellerSelect) return;
+/** Enables type-to-search directly on dropdown items (no separate input field). */
+function bindSelectTypeSearch(select) {
+  if (!select || select.dataset.typeSearchBound === "true") return;
+  select.dataset.typeSearchBound = "true";
 
-  applySelectFilter(sellerSelect, searchInput.value);
-  searchInput.addEventListener("input", () => {
-    formState.sellerSearch = searchInput.value;
-    applySelectFilter(sellerSelect, searchInput.value);
+  let query = "";
+  let lastTypedAt = 0;
+  const resetDelayMs = 800;
+
+  select.addEventListener("keydown", (event) => {
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+
+    if (event.key === "Backspace") {
+      event.preventDefault();
+      query = query.slice(0, -1);
+      applySelectFilter(select, query);
+      return;
+    }
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      query = "";
+      clearSelectFilter(select);
+      return;
+    }
+
+    if (event.key.length !== 1) return;
+
+    event.preventDefault();
+    const now = Date.now();
+    if (now - lastTypedAt > resetDelayMs) {
+      query = "";
+    }
+    query += event.key;
+    lastTypedAt = now;
+    applySelectFilter(select, query);
   });
+
+  const resetFilter = () => {
+    query = "";
+    clearSelectFilter(select);
+  };
+
+  select.addEventListener("blur", resetFilter);
+  select.addEventListener("change", resetFilter);
+}
+
+/** Binds in-dropdown search for top create-order dropdowns. */
+function bindCreateOrderDropdownTypeSearch() {
+  bindSelectTypeSearch(document.getElementById("po-seller"));
+  document.querySelectorAll("#line-items-wrap .item-product, #line-items-wrap .item-variant")
+    .forEach((select) => bindSelectTypeSearch(select));
 }
 
 /** Handles product selection and loads variants for that product. */
@@ -470,7 +493,6 @@ async function onProductChange(items, index, productId) {
   if (!productId) {
     items[index].productId = "";
     items[index].variantId = "";
-    items[index].variantSearch = "";
     items[index].variants = [];
     items[index].unitName = "";
     return;
@@ -478,7 +500,6 @@ async function onProductChange(items, index, productId) {
 
   items[index].productId = productId;
   items[index].variantId = "";
-  items[index].variantSearch = "";
   items[index].unitName = "";
   const response = await apiFetch(endpoints.productVariantsByProduct(productId));
   items[index].variants = response.data || [];
@@ -496,7 +517,7 @@ function redrawLineItems(wrapId, items) {
   const wrap = document.getElementById(wrapId);
   if (!wrap) return;
   wrap.innerHTML = items.map((item, idx) => buildLineItemRow(item, idx)).join("");
-  applyLineItemSelectFilters(wrapId, items);
+  bindCreateOrderDropdownTypeSearch();
 }
 
 /** Creates purchase/update payload from form state + selected line items. */
@@ -658,8 +679,6 @@ async function buildEditState(orderId) {
       return {
         productId: String(variant.productId),
         variantId: String(item.variantId),
-        productSearch: "",
-        variantSearch: "",
         variants,
         unitName: variant.unitName || item.unitAbbr || "",
         quantity: item.quantity,
@@ -756,20 +775,6 @@ function bindLineItemEvents(wrapId, items, onStructureChange) {
     if (!row) return;
     const index = Number(row.dataset.index);
 
-    if (event.target.classList.contains("item-product-search")) {
-      items[index].productSearch = event.target.value;
-      const productSelect = row.querySelector(".item-product");
-      applySelectFilter(productSelect, items[index].productSearch);
-      return;
-    }
-
-    if (event.target.classList.contains("item-variant-search")) {
-      items[index].variantSearch = event.target.value;
-      const variantSelect = row.querySelector(".item-variant");
-      applySelectFilter(variantSelect, items[index].variantSearch);
-      return;
-    }
-
     if (event.target.classList.contains("item-qty")) {
       items[index].quantity = event.target.value;
       recalcLine(items[index]);
@@ -860,8 +865,7 @@ function bindLandingPage() {
   bindLineItemEvents("line-items-wrap", lineItems, () => {
     redrawLineItems("line-items-wrap", lineItems);
   });
-  applyLineItemSelectFilters("line-items-wrap", lineItems);
-  bindSellerSearch();
+  bindCreateOrderDropdownTypeSearch();
 
   bindEditModalEvents();
   bindPostSubmitModalEvents();
