@@ -4,6 +4,7 @@ import { showToast } from "../components/toast.js";
 import { escapeHtml } from "../utils.js";
 
 let activeTab = "sellers";
+let variantsModalState = null;
 const dataStore = {
   sellers: [],
   units: [],
@@ -13,6 +14,10 @@ const dataStore = {
 
 function tabButton(id, label) {
   return `<button class="tab-btn ${activeTab === id ? "active" : ""}" data-tab="${id}" type="button">${label}</button>`;
+}
+
+function getVariantCount(product) {
+  return Array.isArray(product?.variants) ? product.variants.length : 0;
 }
 
 function renderSellers() {
@@ -99,7 +104,20 @@ function renderProducts() {
     dataStore.units.map((u) => `<option value="${u.unitId}">${escapeHtml(u.unitName)} (${escapeHtml(u.abbreviation)})</option>`)
   );
 
-  const rows = dataStore.products.map((p) => `<tr><td>${escapeHtml(p.productName)}</td><td>${escapeHtml(p.typeName || "-")}</td><td>${Array.isArray(p.variants) ? p.variants.length : 0}</td></tr>`).join("");
+  const rows = dataStore.products.map((p) => `
+    <tr>
+      <td>${escapeHtml(p.productName)}</td>
+      <td>${escapeHtml(p.typeName || "-")}</td>
+      <td>
+        <button
+          class="product-variants-trigger"
+          type="button"
+          data-product-id="${p.productId}"
+          aria-label="View variants for ${escapeHtml(p.productName)}"
+        >${getVariantCount(p)}</button>
+      </td>
+    </tr>
+  `).join("");
 
   return `
     <div class="page-grid">
@@ -134,6 +152,70 @@ function renderProducts() {
   `;
 }
 
+function renderVariantsModal() {
+  if (!variantsModalState) {
+    return "";
+  }
+
+  const title = escapeHtml(variantsModalState.productName || "Product");
+  const loading = variantsModalState.loading === true;
+  const error = variantsModalState.error ? escapeHtml(variantsModalState.error) : "";
+  const variants = Array.isArray(variantsModalState.variants) ? variantsModalState.variants : [];
+
+  const body = (() => {
+    if (loading) {
+      return '<div class="muted">Loading variants...</div>';
+    }
+
+    if (error) {
+      return `<div class="muted">Failed to load variants: ${error}</div>`;
+    }
+
+    if (!variants.length) {
+      return '<div class="muted">No active variants found for this product.</div>';
+    }
+
+    const rows = variants.map((v) => `
+      <tr>
+        <td>${escapeHtml(v.variantLabel)}</td>
+        <td>${escapeHtml(v.unitName || "-")}</td>
+        <td>${escapeHtml(v.packSize ?? "-")}</td>
+        <td>${escapeHtml(v.piecesPerPack ?? "-")}</td>
+        <td>${escapeHtml(v.barcode || "-")}</td>
+      </tr>
+    `).join("");
+
+    return `
+      <div class="table-wrap">
+        <table class="table variant-modal-table">
+          <thead>
+            <tr>
+              <th>Variant</th>
+              <th>Unit</th>
+              <th>Pack Size</th>
+              <th>Pieces/Pack</th>
+              <th>Barcode</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+  })();
+
+  return `
+    <div class="modal-backdrop" id="product-variants-modal">
+      <div class="modal-card variant-modal-card" role="dialog" aria-modal="true" aria-labelledby="product-variants-modal-title">
+        <div class="section-title">
+          <h3 id="product-variants-modal-title">Variants: ${title}</h3>
+          <button class="btn btn-secondary" id="product-variants-modal-close" type="button">Close</button>
+        </div>
+        ${body}
+      </div>
+    </div>
+  `;
+}
+
 function renderTabContent() {
   if (activeTab === "sellers") return renderSellers();
   if (activeTab === "units") return renderUnits();
@@ -155,6 +237,7 @@ function renderMaintenancePage() {
       </section>
       <section id="maintenance-content">${renderTabContent()}</section>
     </div>
+    <div id="maintenance-modal-host">${renderVariantsModal()}</div>
   `;
 }
 
@@ -169,6 +252,79 @@ async function refreshData() {
   dataStore.units = unitsRes.data || [];
   dataStore.productTypes = typesRes.data || [];
   dataStore.products = productsRes.data || [];
+}
+
+async function openVariantsModal(productId) {
+  const product = dataStore.products.find((p) => Number(p.productId) === Number(productId));
+  if (!product) {
+    showToast("Product not found", "error");
+    return;
+  }
+
+  variantsModalState = {
+    productId: Number(product.productId),
+    productName: product.productName,
+    loading: true,
+    error: "",
+    variants: [],
+  };
+  rerender();
+
+  try {
+    const response = await apiFetch(endpoints.productVariantsByProduct(product.productId));
+    if (!variantsModalState || variantsModalState.productId !== Number(product.productId)) {
+      return;
+    }
+    variantsModalState = {
+      ...variantsModalState,
+      loading: false,
+      variants: response.data || [],
+    };
+  } catch (err) {
+    if (!variantsModalState || variantsModalState.productId !== Number(product.productId)) {
+      return;
+    }
+    variantsModalState = {
+      ...variantsModalState,
+      loading: false,
+      error: err.message || "Unable to fetch variants",
+      variants: [],
+    };
+  }
+
+  rerender();
+}
+
+function closeVariantsModal() {
+  if (!variantsModalState) {
+    return;
+  }
+  variantsModalState = null;
+  rerender();
+}
+
+function handleMaintenanceEscape(event) {
+  if (event.key === "Escape" && variantsModalState) {
+    closeVariantsModal();
+  }
+}
+
+function bindVariantModal() {
+  document.querySelectorAll(".product-variants-trigger").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const productId = Number(btn.dataset.productId);
+      if (Number.isFinite(productId)) {
+        openVariantsModal(productId);
+      }
+    });
+  });
+
+  document.getElementById("product-variants-modal-close")?.addEventListener("click", closeVariantsModal);
+  document.getElementById("product-variants-modal")?.addEventListener("click", (event) => {
+    if (event.target.id === "product-variants-modal") {
+      closeVariantsModal();
+    }
+  });
 }
 
 function bindForms() {
@@ -241,10 +397,14 @@ function bindMaintenancePage() {
   document.querySelectorAll(".tab-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       activeTab = btn.dataset.tab;
+      variantsModalState = null;
       rerender();
     });
   });
   bindForms();
+  bindVariantModal();
+  document.removeEventListener("keydown", handleMaintenanceEscape);
+  document.addEventListener("keydown", handleMaintenanceEscape);
 }
 
 function rerender() {

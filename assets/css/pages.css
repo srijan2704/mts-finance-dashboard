@@ -183,6 +183,27 @@
   gap: 8px;
 }
 
+.product-variants-trigger {
+  border: 0;
+  background: transparent;
+  color: var(--brand);
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  padding: 0;
+}
+
+.product-variants-trigger:hover {
+  color: #0d53a7;
+}
+
+.product-variants-trigger:focus-visible {
+  outline: 2px solid #b8d2f7;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -204,6 +225,14 @@
   border-radius: 12px;
   padding: 14px;
   box-shadow: var(--shadow);
+}
+
+.variant-modal-card {
+  width: min(900px, 96vw);
+}
+
+.variant-modal-table {
+  min-width: 620px;
 }
 
 @media (max-width: 1200px) {
@@ -256,6 +285,14 @@
     max-height: 95dvh;
     padding: 12px;
     border-radius: 10px;
+  }
+
+  .variant-modal-card {
+    width: min(100%, 560px);
+  }
+
+  .variant-modal-table {
+    min-width: 520px;
   }
 
   .item-row {

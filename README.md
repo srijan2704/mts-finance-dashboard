@@ -4,7 +4,7 @@ Vanilla JavaScript frontend for `mts-purchase-service`.
 
 ## 1. Public URL
 
-- UAT (EC2): `https://ec2-16-16-77-180.eu-north-1.compute.amazonaws.com/`
+-`https://ec2-16-16-77-180.eu-north-1.compute.amazonaws.com/`
 
 ## 2. Tech Stack
 
@@ -89,7 +89,7 @@ Runtime config is in:
 Current environment mapping:
 - `dev` -> `http://localhost:8080`
 - `uat` -> `""` (same-origin; calls `/api/*` through Nginx reverse proxy)
-- `prod` -> `https://mts-purchase-service-1.onrender.com`
+- `prod` -> 
 
 Security behavior:
 - Query/localStorage API-base overrides are disabled.
