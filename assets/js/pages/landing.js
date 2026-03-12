@@ -18,6 +18,7 @@ const initialFormState = () => ({
 
 let formState = initialFormState();
 let editState = null;
+let postSubmitModalState = null;
 
 /** Creates a new empty line item used by create/edit forms. */
 function createEmptyLineItem() {
@@ -210,6 +211,32 @@ function renderEditModal() {
   `;
 }
 
+/** Renders post-submit confirmation modal for newly created drafts. */
+function renderPostSubmitModal() {
+  if (!postSubmitModalState) return "";
+
+  const orderId = Number(postSubmitModalState.orderId);
+  const loading = postSubmitModalState.loading === true;
+
+  return `
+    <div class="modal-backdrop" id="post-submit-modal">
+      <div class="modal-card submit-confirm-modal-card" role="dialog" aria-modal="true" aria-labelledby="post-submit-title">
+        <div class="section-title">
+          <h3 id="post-submit-title">Draft #${escapeHtml(orderId)} created</h3>
+          <button class="btn btn-secondary" id="post-submit-close" type="button" ${loading ? "disabled" : ""}>Close</button>
+        </div>
+        <p class="muted submit-confirm-note">Do you want to confirm this purchase order now?</p>
+        <div class="row submit-confirm-actions">
+          <button class="btn btn-secondary" id="post-submit-keep" type="button" ${loading ? "disabled" : ""}>Keep as Draft</button>
+          <button class="btn btn-primary" id="post-submit-confirm" type="button" ${loading ? "disabled" : ""}>
+            ${loading ? "Confirming..." : "Confirm Now"}
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 /** Renders full landing page content. */
 function renderLandingPage() {
   return `
@@ -287,7 +314,7 @@ function renderLandingPage() {
         </div>
       </section>
     </div>
-    <div id="modal-host">${renderEditModal()}</div>
+    <div id="modal-host">${renderEditModal()}${renderPostSubmitModal()}</div>
   `;
 }
 
@@ -453,18 +480,52 @@ async function submitPurchaseOrder(event) {
 
     const created = response.data;
     showToast(`Purchase order ${created.orderId} saved as draft`);
-
-    if (window.confirm("Draft created. Confirm this purchase now?")) {
-      await apiFetch(endpoints.confirmPurchaseOrder(created.orderId), { method: "PATCH" });
-      showToast("Purchase order confirmed");
-    }
-
+    postSubmitModalState = {
+      orderId: Number(created.orderId),
+      loading: false,
+    };
     lineItems = [createEmptyLineItem()];
     formState = initialFormState();
     await loadCurrentMonthHistory();
     rerender();
   } catch (err) {
     showToast(err.message || "Failed to save purchase order", "error");
+  }
+}
+
+/** Closes post-submit modal and keeps created order as draft. */
+function closePostSubmitModal() {
+  if (!postSubmitModalState) return;
+  postSubmitModalState = null;
+  rerender();
+}
+
+/** Confirms the newly created draft order from post-submit modal. */
+async function confirmCreatedDraftFromModal() {
+  if (!postSubmitModalState || postSubmitModalState.loading) {
+    return;
+  }
+
+  const orderId = Number(postSubmitModalState.orderId);
+  postSubmitModalState = {
+    ...postSubmitModalState,
+    loading: true,
+  };
+  rerender();
+
+  try {
+    await apiFetch(endpoints.confirmPurchaseOrder(orderId), { method: "PATCH" });
+    showToast("Purchase order confirmed");
+    postSubmitModalState = null;
+    await loadCurrentMonthHistory();
+    rerender();
+  } catch (err) {
+    postSubmitModalState = {
+      ...postSubmitModalState,
+      loading: false,
+    };
+    rerender();
+    showToast(err.message || "Failed to confirm purchase order", "error");
   }
 }
 
@@ -662,6 +723,8 @@ function bindLineItemEvents(wrapId, items, onStructureChange) {
 
 /** Binds events for edit modal controls and line items. */
 function bindEditModalEvents() {
+  if (!editState) return;
+
   document.getElementById("edit-close")?.addEventListener("click", closeEditModal);
   document.getElementById("edit-add-line-item")?.addEventListener("click", () => {
     editState.lineItems.push(createEmptyLineItem());
@@ -673,6 +736,33 @@ function bindEditModalEvents() {
   bindLineItemEvents("edit-line-items-wrap", editState.lineItems, () => {
     redrawLineItems("edit-line-items-wrap", editState.lineItems);
   });
+}
+
+/** Binds post-submit modal actions. */
+function bindPostSubmitModalEvents() {
+  document.getElementById("post-submit-close")?.addEventListener("click", closePostSubmitModal);
+  document.getElementById("post-submit-keep")?.addEventListener("click", closePostSubmitModal);
+  document.getElementById("post-submit-confirm")?.addEventListener("click", confirmCreatedDraftFromModal);
+
+  document.getElementById("post-submit-modal")?.addEventListener("click", (event) => {
+    if (event.target.id === "post-submit-modal" && !postSubmitModalState?.loading) {
+      closePostSubmitModal();
+    }
+  });
+}
+
+/** Handles Escape key for active dashboard modals. */
+function handleLandingModalEscape(event) {
+  if (event.key !== "Escape") return;
+
+  if (postSubmitModalState && !postSubmitModalState.loading) {
+    closePostSubmitModal();
+    return;
+  }
+
+  if (editState) {
+    closeEditModal();
+  }
 }
 
 /** Binds all create-form + history interactions for landing page. */
@@ -693,6 +783,11 @@ function bindLandingPage() {
   bindLineItemEvents("line-items-wrap", lineItems, () => {
     redrawLineItems("line-items-wrap", lineItems);
   });
+
+  bindEditModalEvents();
+  bindPostSubmitModalEvents();
+  document.removeEventListener("keydown", handleLandingModalEscape);
+  document.addEventListener("keydown", handleLandingModalEscape);
 }
 
 /** Full rerender for initial mount and full data refresh cases. */

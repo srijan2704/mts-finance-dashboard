@@ -241,6 +241,18 @@
   font-weight: 700;
 }
 
+.submit-confirm-modal-card {
+  width: min(520px, 96vw);
+}
+
+.submit-confirm-note {
+  margin: 4px 0 14px;
+}
+
+.submit-confirm-actions {
+  justify-content: flex-end;
+}
+
 @media (max-width: 1200px) {
   .landing-top-grid {
     grid-template-columns: 1fr;
@@ -299,6 +311,10 @@
 
   .variant-modal-table {
     min-width: 520px;
+  }
+
+  .submit-confirm-actions .btn {
+    width: 100%;
   }
 
   .item-row {
