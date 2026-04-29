@@ -578,8 +578,10 @@ function buildOrderPayload(state, items) {
       .filter((x) => x.variantId && x.quantity && x.ratePerUnit)
       .map((x) => ({
         variantId: Number(x.variantId),
-        quantity: Number(x.quantity),
-        ratePerUnit: Number(x.ratePerUnit),
+        // Send as fixed-precision decimal strings so the backend BigDecimal
+        // deserializer receives exact values without IEEE 754 float drift.
+        quantity: Number(x.quantity).toFixed(3),
+        ratePerUnit: Number(x.ratePerUnit).toFixed(2),
       })),
   };
 }
