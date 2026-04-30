@@ -10,6 +10,18 @@ let orderHistory = [];
 let monthlyTypeChart = null;
 let activeSelectSearchModal = null;
 
+// Month picker state — { year: number, month: number (0-indexed) }
+const _now = new Date();
+let selectedMonth = { year: _now.getFullYear(), month: _now.getMonth() };
+
+// Pagination state
+const ITEMS_PER_PAGE = 10;
+let historyPage = 1;
+
+// Race-condition guard: incremented on every fetch; resolved responses
+// that carry a stale token are discarded without touching orderHistory.
+let historyFetchToken = 0;
+
 const initialFormState = () => ({
   sellerId: "",
   orderDate: new Date().toISOString().slice(0, 10),
@@ -44,17 +56,56 @@ async function loadMasters() {
   products = productRes.data || [];
 }
 
-/** Loads all orders for current month using one date-range API call. */
+/** Returns ISO date range for the currently selected month. */
+function selectedMonthRange() {
+  const d = new Date(selectedMonth.year, selectedMonth.month, 1);
+  return monthStartAndEnd(d);
+}
+
+/** Returns display label for the selected month (e.g. "April 2026"). */
+function selectedMonthLabel() {
+  return new Date(selectedMonth.year, selectedMonth.month, 1)
+    .toLocaleString("default", { month: "long", year: "numeric" });
+}
+
+/** Returns value string for the month input (YYYY-MM). */
+function selectedMonthValue() {
+  const m = String(selectedMonth.month + 1).padStart(2, "0");
+  return `${selectedMonth.year}-${m}`;
+}
+
+/** Loads all orders for the selected month using one date-range API call. */
+/**
+ * Loads orders for the selected month.
+ *
+ * Uses a generation token to discard responses from superseded requests:
+ * if the user switches the month again before a response arrives, the
+ * earlier response is silently dropped and orderHistory is never mutated
+ * with stale data.
+ *
+ * @returns {Promise<boolean>} true when results were applied, false when
+ *   the response was discarded because a newer request was already in-flight.
+ */
 async function loadCurrentMonthHistory() {
-  const month = monthStartAndEnd(new Date());
+  historyFetchToken += 1;
+  const myToken = historyFetchToken;
+
+  const range = selectedMonthRange();
   const response = await apiFetch(withQuery(endpoints.purchaseOrders, {
-    fromDate: month.start,
-    toDate: month.end,
+    fromDate: range.start,
+    toDate: range.end,
   }));
+
+  // A newer request has already been dispatched — discard this response.
+  if (myToken !== historyFetchToken) {
+    return false;
+  }
+
   orderHistory = response.data || [];
 
   // Extra safeguard sort in case backend sort changes in future.
   orderHistory.sort((a, b) => String(b.orderDate).localeCompare(String(a.orderDate)));
+  return true;
 }
 
 /** Recalculates the line total for one row based on quantity and rate. */
@@ -134,13 +185,18 @@ function sellerOptions(selectedSellerId) {
     .join("");
 }
 
-/** Renders purchase history table rows and actions. */
+/** Renders paginated purchase history table rows and actions. */
 function renderHistoryRows() {
   if (!orderHistory.length) {
-    return '<tr><td colspan="6" class="muted">No purchase orders found for current month.</td></tr>';
+    return `<tr><td colspan="6" class="muted">No purchase orders found for ${escapeHtml(selectedMonthLabel())}.</td></tr>`;
   }
 
-  return orderHistory
+  const totalPages = Math.ceil(orderHistory.length / ITEMS_PER_PAGE);
+  historyPage = Math.min(Math.max(1, historyPage), totalPages);
+  const start = (historyPage - 1) * ITEMS_PER_PAGE;
+  const pageOrders = orderHistory.slice(start, start + ITEMS_PER_PAGE);
+
+  return pageOrders
     .map((order) => {
       const isDraft = String(order.status || "").toUpperCase() === "DRAFT";
       return `
@@ -161,6 +217,32 @@ function renderHistoryRows() {
     `;
     })
     .join("");
+}
+
+/** Renders pagination controls below the history table. */
+function renderHistoryPagination() {
+  const total = orderHistory.length;
+  if (total <= ITEMS_PER_PAGE) return "";
+
+  const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
+  const page = Math.min(Math.max(1, historyPage), totalPages);
+  const start = (page - 1) * ITEMS_PER_PAGE + 1;
+  const end = Math.min(page * ITEMS_PER_PAGE, total);
+
+  const atFirst = page <= 1;
+  const atLast  = page >= totalPages;
+
+  return `
+    <div class="history-pagination">
+      <span class="history-page-info">Page ${page} of ${totalPages} &nbsp;&middot;&nbsp; ${start}–${end} of ${total}</span>
+      <div class="row" style="gap:6px">
+        <button class="btn btn-secondary history-first" type="button" ${atFirst ? "disabled" : ""} title="First page">&#8676; First</button>
+        <button class="btn btn-secondary history-prev"  type="button" ${atFirst ? "disabled" : ""} title="Previous page">&#8592; Prev</button>
+        <button class="btn btn-secondary history-next"  type="button" ${atLast  ? "disabled" : ""} title="Next page">Next &#8594;</button>
+        <button class="btn btn-secondary history-last"  type="button" ${atLast  ? "disabled" : ""} title="Last page">Last &#8677;</button>
+      </div>
+    </div>
+  `;
 }
 
 /** Renders edit modal. */
@@ -295,10 +377,20 @@ function renderLandingPage() {
 
       <section class="card">
         <div class="section-title">
-          <h2>Current Month Purchase History</h2>
-          <span class="muted">All orders (green confirmed, yellow draft)</span>
+          <h2 id="history-heading">Purchase History — ${escapeHtml(selectedMonthLabel())}</h2>
+          <div class="history-month-picker-wrap">
+            <label class="label" for="history-month-picker" style="margin:0;white-space:nowrap">Month</label>
+            <input
+              class="input history-month-picker"
+              id="history-month-picker"
+              type="month"
+              value="${escapeHtml(selectedMonthValue())}"
+              max="${escapeHtml(new Date().toISOString().slice(0,7))}"
+              style="width:160px"
+            />
+          </div>
         </div>
-        <div class="table-wrap">
+        <div class="table-wrap history-table-wrap">
           <table class="table">
             <thead>
               <tr>
@@ -313,6 +405,7 @@ function renderLandingPage() {
             <tbody id="history-body">${renderHistoryRows()}</tbody>
           </table>
         </div>
+        <div id="history-pagination-wrap">${renderHistoryPagination()}</div>
       </section>
     </div>
     <div id="modal-host">${renderEditModal()}${renderPostSubmitModal()}</div>
@@ -692,11 +785,20 @@ async function handleHistoryAction(event) {
   }
 }
 
-/** Draws only history table body when data changes. */
+/** Draws history table body + pagination without full page rerender. */
 function redrawHistory() {
   const body = document.getElementById("history-body");
-  if (!body) return;
-  body.innerHTML = renderHistoryRows();
+  if (body) body.innerHTML = renderHistoryRows();
+
+  const paginationWrap = document.getElementById("history-pagination-wrap");
+  if (paginationWrap) {
+    paginationWrap.innerHTML = renderHistoryPagination();
+    bindPaginationEvents();
+  }
+
+  const heading = document.getElementById("history-heading");
+  if (heading) heading.textContent = `Purchase History — ${selectedMonthLabel()}`;
+
   renderMonthlyTypeSplitChart();
 }
 
@@ -901,6 +1003,37 @@ function handleLandingModalEscape(event) {
   }
 }
 
+/** Binds pagination first/prev/next/last buttons. */
+function bindPaginationEvents() {
+  const totalPages = () => Math.ceil(orderHistory.length / ITEMS_PER_PAGE);
+
+  document.querySelector(".history-first")?.addEventListener("click", () => {
+    if (historyPage !== 1) {
+      historyPage = 1;
+      redrawHistory();
+    }
+  });
+  document.querySelector(".history-prev")?.addEventListener("click", () => {
+    if (historyPage > 1) {
+      historyPage -= 1;
+      redrawHistory();
+    }
+  });
+  document.querySelector(".history-next")?.addEventListener("click", () => {
+    if (historyPage < totalPages()) {
+      historyPage += 1;
+      redrawHistory();
+    }
+  });
+  document.querySelector(".history-last")?.addEventListener("click", () => {
+    const tp = totalPages();
+    if (historyPage !== tp) {
+      historyPage = tp;
+      redrawHistory();
+    }
+  });
+}
+
 /** Binds all create-form + history interactions for landing page. */
 function bindLandingPage() {
   document.getElementById("add-line-item")?.addEventListener("click", () => {
@@ -916,10 +1049,55 @@ function bindLandingPage() {
   document.getElementById("po-form")?.addEventListener("submit", submitPurchaseOrder);
   document.getElementById("history-body")?.addEventListener("click", handleHistoryAction);
 
+  // Month picker — fetch new data when user changes the month.
+  document.getElementById("history-month-picker")?.addEventListener("change", async (event) => {
+    const [year, month] = (event.target.value || "").split("-").map(Number);
+    if (!year || !month) return;
+
+    // Snapshot previous state so we can roll back on failure and keep
+    // orderHistory, the heading, and the picker input all in sync.
+    const previousMonth = selectedMonth;
+    const previousPage  = historyPage;
+
+    selectedMonth = { year, month: month - 1 };
+    historyPage = 1;
+
+    // Capture the token that loadCurrentMonthHistory will stamp this request
+    // with. historyFetchToken is incremented inside that function, so we read
+    // it one tick after the call to know which token was assigned.
+    const tokenBeforeCall = historyFetchToken;
+    try {
+      const applied = await loadCurrentMonthHistory();
+      // Only redraw when this response is still the latest one.
+      // If the user switched months again while the request was in-flight,
+      // the newer handler will perform its own redraw once it resolves.
+      if (applied) {
+        redrawHistory();
+      }
+    } catch (err) {
+      // Roll back to the previous month so the heading stays consistent
+      // with the unchanged orderHistory. Also restore the picker DOM input so
+      // the user sees the month that is actually displayed, not the failed one.
+      selectedMonth = previousMonth;
+      historyPage   = previousPage;
+      const picker = document.getElementById("history-month-picker");
+      if (picker) picker.value = selectedMonthValue();
+
+      // Suppress stale error toasts: only show the error if no newer request
+      // has been dispatched since this one started (tokenBeforeCall + 1 is the
+      // token that was assigned to our call; if historyFetchToken is larger,
+      // a later request has already superseded us).
+      if (historyFetchToken <= tokenBeforeCall + 1) {
+        showToast(err.message || "Failed to load orders", "error");
+      }
+    }
+  });
+
   bindLineItemEvents("line-items-wrap", lineItems, () => {
     redrawLineItems("line-items-wrap", lineItems);
   });
   bindCreateOrderDropdownSearch();
+  bindPaginationEvents();
 
   bindEditModalEvents();
   bindPostSubmitModalEvents();
