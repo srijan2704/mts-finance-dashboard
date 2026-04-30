@@ -101,6 +101,70 @@
   background: var(--brand);
 }
 
+/* ── Financial Year Summary Panel ────────────────────────────────── */
+.sidebar-fy-panel {
+  margin-top: 10px;
+  border: 1px solid #c9d8f0;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #eaf3ff 0%, #f4f8ff 100%);
+  padding: 12px;
+  display: grid;
+  gap: 4px;
+}
+
+.sidebar-fy-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.sidebar-fy-icon {
+  width: 14px;
+  height: 14px;
+  fill: #2d7ee6;
+  flex-shrink: 0;
+}
+
+.sidebar-fy-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #1a4d8f;
+}
+
+.sidebar-fy-value {
+  min-height: 28px;
+}
+
+.sidebar-fy-amount {
+  font-size: 20px;
+  font-weight: 900;
+  color: #1058b0;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  word-break: break-all;
+}
+
+.sidebar-fy-meta {
+  font-size: 11px;
+  color: #5470a0;
+  font-weight: 600;
+}
+
+.sidebar-fy-loading {
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.sidebar-fy-error {
+  font-size: 12px;
+  color: var(--danger);
+  font-weight: 600;
+}
+
 .nav {
   display: flex;
   align-items: center;
