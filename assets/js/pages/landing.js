@@ -204,15 +204,17 @@ function renderHistoryPagination() {
   const start = (page - 1) * ITEMS_PER_PAGE + 1;
   const end = Math.min(page * ITEMS_PER_PAGE, total);
 
-  const prevDisabled = page <= 1 ? "disabled" : "";
-  const nextDisabled = page >= totalPages ? "disabled" : "";
+  const atFirst = page <= 1;
+  const atLast  = page >= totalPages;
 
   return `
     <div class="history-pagination">
-      <span class="history-page-info">${start}–${end} of ${total}</span>
+      <span class="history-page-info">Page ${page} of ${totalPages} &nbsp;&middot;&nbsp; ${start}–${end} of ${total}</span>
       <div class="row" style="gap:6px">
-        <button class="btn btn-secondary history-prev" type="button" ${prevDisabled}>&#8592; Prev</button>
-        <button class="btn btn-secondary history-next" type="button" ${nextDisabled}>Next &#8594;</button>
+        <button class="btn btn-secondary history-first" type="button" ${atFirst ? "disabled" : ""} title="First page">&#8676; First</button>
+        <button class="btn btn-secondary history-prev"  type="button" ${atFirst ? "disabled" : ""} title="Previous page">&#8592; Prev</button>
+        <button class="btn btn-secondary history-next"  type="button" ${atLast  ? "disabled" : ""} title="Next page">Next &#8594;</button>
+        <button class="btn btn-secondary history-last"  type="button" ${atLast  ? "disabled" : ""} title="Last page">Last &#8677;</button>
       </div>
     </div>
   `;
@@ -976,8 +978,16 @@ function handleLandingModalEscape(event) {
   }
 }
 
-/** Binds pagination prev/next buttons. */
+/** Binds pagination first/prev/next/last buttons. */
 function bindPaginationEvents() {
+  const totalPages = () => Math.ceil(orderHistory.length / ITEMS_PER_PAGE);
+
+  document.querySelector(".history-first")?.addEventListener("click", () => {
+    if (historyPage !== 1) {
+      historyPage = 1;
+      redrawHistory();
+    }
+  });
   document.querySelector(".history-prev")?.addEventListener("click", () => {
     if (historyPage > 1) {
       historyPage -= 1;
@@ -985,9 +995,15 @@ function bindPaginationEvents() {
     }
   });
   document.querySelector(".history-next")?.addEventListener("click", () => {
-    const totalPages = Math.ceil(orderHistory.length / ITEMS_PER_PAGE);
-    if (historyPage < totalPages) {
+    if (historyPage < totalPages()) {
       historyPage += 1;
+      redrawHistory();
+    }
+  });
+  document.querySelector(".history-last")?.addEventListener("click", () => {
+    const tp = totalPages();
+    if (historyPage !== tp) {
+      historyPage = tp;
       redrawHistory();
     }
   });
