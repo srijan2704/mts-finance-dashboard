@@ -183,6 +183,38 @@
   gap: 8px;
 }
 
+/* Month picker inline with history section title */
+.history-month-picker-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Scrollable table body capped to ~10 rows (each ~42px) */
+.history-table-wrap {
+  max-height: 490px;
+  overflow-y: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Pagination bar below the history table */
+.history-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 4px 2px;
+  flex-wrap: wrap;
+}
+
+.history-page-info {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
 .product-variants-trigger {
   border: 0;
   background: transparent;
