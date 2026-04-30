@@ -18,6 +18,10 @@ let selectedMonth = { year: _now.getFullYear(), month: _now.getMonth() };
 const ITEMS_PER_PAGE = 10;
 let historyPage = 1;
 
+// Race-condition guard: incremented on every fetch; resolved responses
+// that carry a stale token are discarded without touching orderHistory.
+let historyFetchToken = 0;
+
 const initialFormState = () => ({
   sellerId: "",
   orderDate: new Date().toISOString().slice(0, 10),
@@ -71,16 +75,37 @@ function selectedMonthValue() {
 }
 
 /** Loads all orders for the selected month using one date-range API call. */
+/**
+ * Loads orders for the selected month.
+ *
+ * Uses a generation token to discard responses from superseded requests:
+ * if the user switches the month again before a response arrives, the
+ * earlier response is silently dropped and orderHistory is never mutated
+ * with stale data.
+ *
+ * @returns {Promise<boolean>} true when results were applied, false when
+ *   the response was discarded because a newer request was already in-flight.
+ */
 async function loadCurrentMonthHistory() {
+  historyFetchToken += 1;
+  const myToken = historyFetchToken;
+
   const range = selectedMonthRange();
   const response = await apiFetch(withQuery(endpoints.purchaseOrders, {
     fromDate: range.start,
     toDate: range.end,
   }));
+
+  // A newer request has already been dispatched — discard this response.
+  if (myToken !== historyFetchToken) {
+    return false;
+  }
+
   orderHistory = response.data || [];
 
   // Extra safeguard sort in case backend sort changes in future.
   orderHistory.sort((a, b) => String(b.orderDate).localeCompare(String(a.orderDate)));
+  return true;
 }
 
 /** Recalculates the line total for one row based on quantity and rate. */
@@ -1028,14 +1053,44 @@ function bindLandingPage() {
   document.getElementById("history-month-picker")?.addEventListener("change", async (event) => {
     const [year, month] = (event.target.value || "").split("-").map(Number);
     if (!year || !month) return;
+
+    // Snapshot previous state so we can roll back on failure and keep
+    // orderHistory, the heading, and the picker input all in sync.
+    const previousMonth = selectedMonth;
+    const previousPage  = historyPage;
+
     selectedMonth = { year, month: month - 1 };
     historyPage = 1;
+
+    // Capture the token that loadCurrentMonthHistory will stamp this request
+    // with. historyFetchToken is incremented inside that function, so we read
+    // it one tick after the call to know which token was assigned.
+    const tokenBeforeCall = historyFetchToken;
     try {
-      await loadCurrentMonthHistory();
+      const applied = await loadCurrentMonthHistory();
+      // Only redraw when this response is still the latest one.
+      // If the user switched months again while the request was in-flight,
+      // the newer handler will perform its own redraw once it resolves.
+      if (applied) {
+        redrawHistory();
+      }
     } catch (err) {
-      showToast(err.message || "Failed to load orders", "error");
+      // Roll back to the previous month so the heading stays consistent
+      // with the unchanged orderHistory. Also restore the picker DOM input so
+      // the user sees the month that is actually displayed, not the failed one.
+      selectedMonth = previousMonth;
+      historyPage   = previousPage;
+      const picker = document.getElementById("history-month-picker");
+      if (picker) picker.value = selectedMonthValue();
+
+      // Suppress stale error toasts: only show the error if no newer request
+      // has been dispatched since this one started (tokenBeforeCall + 1 is the
+      // token that was assigned to our call; if historyFetchToken is larger,
+      // a later request has already superseded us).
+      if (historyFetchToken <= tokenBeforeCall + 1) {
+        showToast(err.message || "Failed to load orders", "error");
+      }
     }
-    redrawHistory();
   });
 
   bindLineItemEvents("line-items-wrap", lineItems, () => {
