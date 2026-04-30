@@ -1,7 +1,6 @@
 import { apiFetch, withQuery } from "../api/client.js";
 import { endpoints } from "../api/endpoints.js";
 import { showToast } from "../components/toast.js";
-import { updateSidebarFyPanel } from "../components/navbar.js";
 import { escapeHtml, monthStartAndEnd, statusBadge } from "../utils.js";
 
 let sellers = [];
@@ -1116,20 +1115,6 @@ function rerender() {
 }
 
 /** Mounts landing page and preloads all required master/history data. */
-/**
- * Fetches the current FY summary and updates the sidebar panel.
- * Runs independently — a failure shows an error state in the panel but
- * does not affect the rest of the landing page.
- */
-async function loadAndDisplayFySummary() {
-  try {
-    const response = await apiFetch(endpoints.purchaseOrdersFySummary);
-    updateSidebarFyPanel(response.data || null);
-  } catch {
-    updateSidebarFyPanel(null);
-  }
-}
-
 async function mountLandingPage() {
   if (!lineItems.length) lineItems.push(createEmptyLineItem());
 
@@ -1140,9 +1125,6 @@ async function mountLandingPage() {
     const root = document.getElementById("route-root");
     root.innerHTML = `<div class="card">Failed to load landing page data: ${escapeHtml(err.message)}</div>`;
   }
-
-  // Non-blocking: fetch FY summary after critical data is rendered.
-  loadAndDisplayFySummary();
 }
 
 export { mountLandingPage };
