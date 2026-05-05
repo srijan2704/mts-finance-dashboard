@@ -119,6 +119,7 @@ export const endpoints = {
   purchaseOrders: "/api/purchase-orders",
   purchaseOrderById: (id) => `/api/purchase-orders/${id}`,
   confirmPurchaseOrder: (id) => `/api/purchase-orders/${id}/confirm`,
+  purchaseOrdersFySummary: "/api/purchase-orders/fy-summary",
   reportsDailyTrend: "/api/reports/trends/daily-purchase",
   reportsTopProducts: "/api/reports/trends/top-products",
   reportsTopSellers: "/api/reports/trends/top-sellers",
