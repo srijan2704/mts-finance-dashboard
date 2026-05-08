@@ -30,8 +30,52 @@ function renderSidebar(activeHash) {
         ${navLink("#/maintenance", activeHash, "Maintenance")}
         ${navLink("#/reports", activeHash, "Reporting")}
       </div>
+
+      <div class="sidebar-fy-panel" id="sidebar-fy-panel" aria-label="Financial year summary">
+        <div class="sidebar-fy-title">
+          <svg viewBox="0 0 24 24" class="sidebar-fy-icon" aria-hidden="true">
+            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm1 14.93V18a1 1 0 0 1-2 0v-1.07A8 8 0 0 1 4.07 11H5a1 1 0 0 1 0 2 6 6 0 0 0 6 6Zm0-9.86V8a1 1 0 0 1 2 0v1.07A8 8 0 0 1 19.93 15H19a1 1 0 0 1 0-2 6 6 0 0 0-6-6Z"/>
+          </svg>
+          <span class="sidebar-fy-label" id="sidebar-fy-label">FY Summary</span>
+        </div>
+        <div class="sidebar-fy-value" id="sidebar-fy-value">
+          <span class="sidebar-fy-loading">Loading…</span>
+        </div>
+        <div class="sidebar-fy-meta" id="sidebar-fy-meta"></div>
+      </div>
     </aside>
   `;
+}
+
+/**
+ * Populates the FY summary panel in the sidebar with live data from the API.
+ * Call this after a successful fetch; it is a no-op if the panel is not mounted.
+ *
+ * @param {{ label: string, totalPurchaseValue: number|string, orderCount: number }|null} summary
+ *   Pass null to render an error state.
+ */
+function updateSidebarFyPanel(summary) {
+  const labelEl = document.getElementById("sidebar-fy-label");
+  const valueEl = document.getElementById("sidebar-fy-value");
+  const metaEl  = document.getElementById("sidebar-fy-meta");
+  if (!labelEl || !valueEl) return;
+
+  if (!summary) {
+    valueEl.innerHTML = '<span class="sidebar-fy-error">Unavailable</span>';
+    return;
+  }
+
+  labelEl.textContent = summary.label || "FY Summary";
+
+  const formatted = Number(summary.totalPurchaseValue).toLocaleString("en-IN", {
+    maximumFractionDigits: 0,
+  });
+  valueEl.innerHTML = `<span class="sidebar-fy-amount">&#x20B9;&nbsp;${formatted}</span>`;
+
+  if (metaEl) {
+    const count = summary.orderCount ?? 0;
+    metaEl.textContent = `${count} order${count !== 1 ? "s" : ""}`;
+  }
 }
 
 function renderNavbar(activeHash) {
@@ -71,4 +115,4 @@ function bindNavbarHandlers() {
   }
 }
 
-export { renderNavbar, renderSidebar, bindNavbarHandlers };
+export { renderNavbar, renderSidebar, updateSidebarFyPanel, bindNavbarHandlers };
