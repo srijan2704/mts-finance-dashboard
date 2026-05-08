@@ -319,7 +319,7 @@ function renderLandingPage() {
   `;
 }
 
-/** Returns month-level product type totals built from loaded orders and product masters. */
+/** Returns month-level product type totals built from CONFIRMED orders only. */
 function getMonthlyProductTypeTotals() {
   const typeByProductName = new Map(
     (products || []).map((p) => [String(p.productName || "").trim().toLowerCase(), p.typeName || "Others"]),
@@ -327,6 +327,9 @@ function getMonthlyProductTypeTotals() {
   const totalsByType = new Map();
 
   (orderHistory || []).forEach((order) => {
+    // Only count confirmed orders — drafts are not yet committed purchases.
+    if (String(order.status || "").toUpperCase() !== "CONFIRMED") return;
+
     (order.items || []).forEach((item) => {
       const productKey = String(item.productName || "").trim().toLowerCase();
       const typeName = typeByProductName.get(productKey) || "Others";
