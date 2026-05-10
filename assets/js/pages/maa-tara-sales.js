@@ -5,17 +5,17 @@
  */
 
 const PRODUCT_IMAGES = [
-  { src: "assets/brand/maa-tara-sales/images-1.jpeg", srcSm: "assets/brand/maa-tara-sales/images-1-sm.jpg", alt: "Saloni Kachchi Ghani Mustard Oil — 1L Pouch", label: "1 Litre Pouch" },
-  { src: "assets/brand/maa-tara-sales/images-2.jpeg", srcSm: "assets/brand/maa-tara-sales/images-2-sm.jpg", alt: "Saloni Pure Mustard Oil — 500ml Bottle", label: "500ml Bottle" },
-  { src: "assets/brand/maa-tara-sales/images-3.jpeg", srcSm: "assets/brand/maa-tara-sales/images-3-sm.jpg", alt: "Saloni Agmark Mustard Oil — 15 Litre Tin", label: "15 Litre Tin" },
-  { src: "assets/brand/maa-tara-sales/images-4.jpg", srcSm: "assets/brand/maa-tara-sales/images-4-sm.jpg", alt: "Saloni Kachchi Ghani Pure Mustard Oil — 2 Litre Jar", label: "2 Litre Jar" },
+  { src: "assets/brand/maa-tara-sales/images-1.jpeg", alt: "Saloni Kachchi Ghani Mustard Oil — 1L Pouch", label: "1 Litre Pouch" },
+  { src: "assets/brand/maa-tara-sales/images-2.jpeg", alt: "Saloni Pure Mustard Oil — 500ml Bottle", label: "500ml Bottle" },
+  { src: "assets/brand/maa-tara-sales/images-3.jpeg", alt: "Saloni Agmark Mustard Oil — 15 Litre Tin", label: "15 Litre Tin" },
+  { src: "assets/brand/maa-tara-sales/images-4.jpg", alt: "Saloni Kachchi Ghani Pure Mustard Oil — 2 Litre Jar", label: "2 Litre Jar" },
 ];
 
 function renderProductCard(img) {
   return `
     <div class="dp-product-card">
       <div class="dp-product-img-wrap">
-        <img src="${img.srcSm}" srcset="${img.srcSm} 400w, ${img.src} 800w" sizes="(max-width: 600px) 400px, 800px" alt="${img.alt}" class="dp-product-img" loading="lazy" decoding="async"/>
+        <img src="${img.src}" alt="${img.alt}" class="dp-product-img" loading="lazy" decoding="async"/>
       </div>
       <div class="dp-product-label">${img.label}</div>
     </div>

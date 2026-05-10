@@ -539,17 +539,17 @@
 .gh-hero-brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 999px;
-  padding: 5px 14px 5px 5px;
+  padding: 8px 24px 8px 8px;
   transform: translateZ(0);
 }
 
 .gh-hero-logo {
-  width: 30px;
-  height: 30px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   display: block;
 }
@@ -561,14 +561,14 @@
 }
 
 .gh-hero-brand-name {
-  font-size: 12.5px;
+  font-size: 16px;
   font-weight: 800;
   color: #f0f4ff;
   line-height: 1.2;
 }
 
 .gh-hero-brand-sub {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: rgba(200, 215, 255, 0.6);
 }

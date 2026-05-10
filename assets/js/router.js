@@ -1,14 +1,6 @@
 import { getAuth } from "./state/store.js";
 import { renderNavbar, renderSidebar, updateSidebarFyPanel, bindNavbarHandlers } from "./components/navbar.js";
 import { renderLoginPage, bindLoginPage } from "./pages/login.js";
-import { mountLandingPage } from "./pages/landing.js";
-import { mountMaintenancePage } from "./pages/maintenance.js";
-import { mountReportsPage, unmountReportsPage } from "./pages/reports.js";
-import { mountGroupHomePage } from "./pages/group-home.js";
-import { mountMaaTaraStorePage } from "./pages/maa-tara-store.js";
-import { mountMaaTaraSalesPage } from "./pages/maa-tara-sales.js";
-import { mountMaaTaraWarehousePage } from "./pages/maa-tara-warehouse.js";
-import { mountMaaTaraTowerPage } from "./pages/maa-tara-tower.js";
 import { apiFetch } from "./api/client.js";
 import { endpoints } from "./api/endpoints.js";
 
@@ -65,6 +57,7 @@ async function route() {
   const auth = getAuth();
 
   if (currentView === "reports") {
+    const { unmountReportsPage } = await import("./pages/reports.js");
     unmountReportsPage();
   }
 
@@ -93,26 +86,31 @@ async function route() {
 
     if (hash === "#/group-home") {
       currentView = "group-home";
+      const { mountGroupHomePage } = await import("./pages/group-home.js");
       mountGroupHomePage();
       return;
     }
     if (hash === "#/maa-tara-store") {
       currentView = "maa-tara-store";
+      const { mountMaaTaraStorePage } = await import("./pages/maa-tara-store.js");
       mountMaaTaraStorePage();
       return;
     }
     if (hash === "#/maa-tara-sales") {
       currentView = "maa-tara-sales";
+      const { mountMaaTaraSalesPage } = await import("./pages/maa-tara-sales.js");
       mountMaaTaraSalesPage();
       return;
     }
     if (hash === "#/maa-tara-warehouse") {
       currentView = "maa-tara-warehouse";
+      const { mountMaaTaraWarehousePage } = await import("./pages/maa-tara-warehouse.js");
       mountMaaTaraWarehousePage();
       return;
     }
     if (hash === "#/maa-tara-tower") {
       currentView = "maa-tara-tower";
+      const { mountMaaTaraTowerPage } = await import("./pages/maa-tara-tower.js");
       mountMaaTaraTowerPage();
       return;
     }
@@ -125,18 +123,21 @@ async function route() {
 
   if (hash === "#/landing") {
     currentView = "landing";
+    const { mountLandingPage } = await import("./pages/landing.js");
     await mountLandingPage();
     return;
   }
 
   if (hash === "#/maintenance") {
     currentView = "maintenance";
+    const { mountMaintenancePage } = await import("./pages/maintenance.js");
     await mountMaintenancePage();
     return;
   }
 
   if (hash === "#/reports") {
     currentView = "reports";
+    const { mountReportsPage } = await import("./pages/reports.js");
     await mountReportsPage();
     return;
   }
