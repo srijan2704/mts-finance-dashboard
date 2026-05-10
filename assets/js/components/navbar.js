@@ -3,6 +3,11 @@ import { getAuth, saveAuth } from "../state/store.js";
 function pageTitle(activeHash) {
   if (activeHash === "#/maintenance") return "Maintenance";
   if (activeHash === "#/reports") return "Reporting Dashboard";
+  if (activeHash === "#/group-home") return "Sah & Sons Group";
+  if (activeHash === "#/maa-tara-store") return "Maa Tara Store";
+  if (activeHash === "#/maa-tara-sales") return "Maa Tara Sales";
+  if (activeHash === "#/maa-tara-warehouse") return "Maa Tara Warehouse";
+  if (activeHash === "#/maa-tara-tower") return "Maa Tara Tower";
   return "Purchase Dashboard";
 }
 
@@ -25,8 +30,12 @@ function renderSidebar(activeHash) {
         <div class="sidebar-brand-sub">With blessings of Maa Tara</div>
       </div>
       <div class="sidebar-group">
-        <div class="sidebar-group-title">Menu</div>
-        ${navLink("#/landing", activeHash, "Landing")}
+        <div class="sidebar-group-title">Group</div>
+        ${navLink("#/group-home", activeHash, "Group Home")}
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">MTS Operations</div>
+        ${navLink("#/landing", activeHash, "Purchase Dashboard")}
         ${navLink("#/maintenance", activeHash, "Maintenance")}
         ${navLink("#/reports", activeHash, "Reporting")}
       </div>

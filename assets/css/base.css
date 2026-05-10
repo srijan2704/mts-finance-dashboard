@@ -1,17 +1,17 @@
 :root {
-  --bg: #edf1f7;
-  --panel: #ffffff;
-  --panel-soft: #f7f9fd;
-  --ink: #202b3c;
-  --muted: #6a7688;
-  --line: #dde4ef;
-  --brand: #2d7ee6;
-  --brand-soft: #eaf3ff;
-  --ok: #1ea35e;
-  --warn: #c79d2f;
-  --danger: #cb4757;
-  --radius: 12px;
-  --shadow: 0 6px 18px rgba(28, 43, 72, 0.08);
+  --bg: #09101e;
+  --panel: rgba(255, 255, 255, 0.04);
+  --panel-soft: rgba(255, 255, 255, 0.015);
+  --ink: #f0f4ff;
+  --muted: rgba(200, 215, 255, 0.6);
+  --line: rgba(255, 255, 255, 0.1);
+  --brand: #60a5fa;
+  --brand-soft: rgba(96, 165, 250, 0.15);
+  --ok: #22c55e;
+  --warn: #f59e0b;
+  --danger: #ef4444;
+  --radius: 14px;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -28,8 +28,7 @@ body {
   min-height: 100dvh;
   color: var(--ink);
   font-family: "Manrope", "Plus Jakarta Sans", sans-serif;
-  background:
-    radial-gradient(circle at top left, #f8fbff 0%, #edf2f9 42%, #e9edf5 100%);
+  background: var(--bg);
   overflow-x: hidden;
 }
 
@@ -92,6 +91,8 @@ canvas {
   padding: 14px;
   overflow: hidden;
   min-width: 0;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .row {

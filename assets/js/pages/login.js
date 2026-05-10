@@ -5,7 +5,12 @@ import { showToast } from "../components/toast.js";
 
 function renderLoginPage() {
   return `
-    <div class="login-wrap">
+    <div class="login-wrap" style="--dp-orb-a:#60a5fa; --dp-orb-b:#34d399;">
+      <!-- Ambient background orbs -->
+      <div class="dp-bg" aria-hidden="true" style="position:fixed; z-index:0; pointer-events:none;">
+        <div class="dp-orb dp-orb-1"></div>
+        <div class="dp-orb dp-orb-2"></div>
+      </div>
       <section class="login-card login-card-compact">
         <h1 class="login-title">MTS Finance Dashboard</h1>
         <p class="login-subtitle">Secure sign in for business operations</p>

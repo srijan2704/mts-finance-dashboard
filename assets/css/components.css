@@ -6,13 +6,15 @@
   padding: 14px;
   position: sticky;
   top: 12px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .sidebar-brand-wrap {
   margin-bottom: 14px;
-  border: 1px solid #dcd6db;
+  border: 1px solid var(--line);
   border-radius: 12px;
-  background: #fff;
+  background: var(--panel-soft);
   padding: 10px;
   display: grid;
   gap: 6px;
@@ -32,20 +34,20 @@
   font-weight: 900;
   line-height: 1.15;
   letter-spacing: -0.01em;
-  color: #1b273a;
+  color: var(--ink);
 }
 
 .sidebar-brand-divider {
   width: 100%;
   height: 1px;
-  background: #e4e9f2;
+  background: var(--line);
 }
 
 .sidebar-brand-sub {
   font-size: 12px;
   font-weight: 700;
   line-height: 1.25;
-  color: #5f6a7c;
+  color: var(--muted);
   white-space: normal;
 }
 
@@ -58,7 +60,7 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 11px;
-  color: #6d7b90;
+  color: var(--muted);
   font-weight: 800;
   margin-bottom: 2px;
 }
@@ -71,7 +73,7 @@
   color: var(--ink);
   border: 1px solid transparent;
   border-radius: 10px;
-  background: #fff;
+  background: transparent;
   padding: 9px 10px;
   font-weight: 700;
   transition: all 0.15s ease;
@@ -80,14 +82,14 @@
 }
 
 .sidebar-link:hover {
-  border-color: #d3e1f8;
-  background: #f7fbff;
+  border-color: var(--line);
+  background: var(--panel-soft);
 }
 
 .sidebar-link.active {
-  border-color: #b8d2f7;
-  background: #eaf3ff;
-  color: #1058b0;
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  color: var(--brand);
 }
 
 .sidebar-link-dot {
@@ -104,9 +106,9 @@
 /* ── Financial Year Summary Panel ────────────────────────────────── */
 .sidebar-fy-panel {
   margin-top: 10px;
-  border: 1px solid #c9d8f0;
+  border: 1px solid var(--line);
   border-radius: 12px;
-  background: linear-gradient(145deg, #eaf3ff 0%, #f4f8ff 100%);
+  background: var(--panel-soft);
   padding: 12px;
   display: grid;
   gap: 4px;
@@ -141,7 +143,7 @@
 .sidebar-fy-amount {
   font-size: 20px;
   font-weight: 900;
-  color: #1058b0;
+  color: var(--brand);
   letter-spacing: -0.02em;
   line-height: 1.15;
   word-break: break-all;
@@ -175,6 +177,8 @@
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 12px 14px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .nav-title {
@@ -204,7 +208,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  border: 1px solid #d6deea;
+  border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--panel-soft);
   padding: 8px 11px;
@@ -220,7 +224,7 @@
 }
 
 .user-chip-name {
-  color: #2a63ae;
+  color: var(--brand);
   font-size: 13px;
   font-weight: 700;
   white-space: nowrap;
@@ -232,10 +236,10 @@
   position: relative;
   width: 36px;
   height: 36px;
-  border: 1px solid #d6deea;
+  border: 1px solid var(--line);
   border-radius: 10px;
-  background: #fff;
-  color: #5e6c80;
+  background: var(--panel-soft);
+  color: var(--muted);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -245,9 +249,9 @@
 }
 
 .icon-btn:hover {
-  background: #eef5ff;
-  border-color: #b9cef3;
-  color: #175fb7;
+  background: var(--brand-soft);
+  border-color: var(--brand);
+  color: var(--brand);
 }
 
 .icon-btn svg {
@@ -290,21 +294,21 @@
 }
 
 .btn-secondary {
-  background: #fff;
+  background: var(--panel-soft);
   color: var(--ink);
   border-color: var(--line);
 }
 
 .btn-danger {
-  background: #fff3f4;
+  background: rgba(239, 68, 68, 0.1);
   color: var(--danger);
-  border-color: #f2c6cb;
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 .btn-info {
-  background: #ecf3ff;
-  color: #1a63bc;
-  border-color: #bfd3f5;
+  background: rgba(96, 165, 250, 0.1);
+  color: var(--brand);
+  border-color: rgba(96, 165, 250, 0.3);
 }
 
 .btn:disabled {
@@ -321,7 +325,7 @@
   padding: 9px 10px;
   font-family: inherit;
   font-size: 16px;
-  background: #fff;
+  background: var(--panel-soft);
   color: var(--ink);
   -webkit-appearance: none;
   appearance: none;
@@ -330,8 +334,8 @@
 .input:focus,
 .select:focus,
 .textarea:focus {
-  outline: 2px solid #d3e5ff;
-  border-color: #9dc2f6;
+  outline: 2px solid var(--brand-soft);
+  border-color: var(--brand);
 }
 
 .label {
@@ -359,7 +363,7 @@
   -webkit-overflow-scrolling: touch;
   border: 1px solid var(--line);
   border-radius: 10px;
-  background: #fff;
+  background: var(--panel-soft);
 }
 
 .table {
@@ -377,10 +381,11 @@
 }
 
 .table th {
-  background: var(--panel-soft);
+  background: var(--panel);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+  color: var(--muted);
 }
 
 .toast {
