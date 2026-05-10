@@ -481,6 +481,8 @@
   filter: blur(80px);
   opacity: 0.28;
   animation: orbDrift 18s ease-in-out infinite alternate;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .gh-orb-1 {
@@ -542,8 +544,7 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 999px;
   padding: 5px 14px 5px 5px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  transform: translateZ(0);
 }
 
 .gh-hero-logo {
@@ -627,9 +628,8 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   overflow: hidden;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   flex-wrap: wrap;
+  transform: translateZ(0);
 }
 
 .gh-hero-stat {

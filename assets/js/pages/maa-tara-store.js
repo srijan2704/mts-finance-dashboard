@@ -26,7 +26,7 @@ function renderMaaTaraStorePage() {
           <img src="assets/brand/mts-brand-mark.svg" alt="" class="dp-nav-logo" aria-hidden="true"/>
           <span>Sah &amp; Sons Group</span>
         </div>
-        <a href="#/landing" class="dp-nav-action" id="store-admin-portal-nav" title="MTS Purchase Dashboard">
+        <a href="#/landing" target="_blank" rel="noopener noreferrer" class="dp-nav-action" id="store-admin-portal-nav" title="MTS Purchase Dashboard">
           <svg viewBox="0 0 20 20" fill="none">
             <rect x="2" y="2" width="7" height="7" rx="1.5" fill="currentColor" fill-opacity="0.3" stroke="currentColor" stroke-width="1.4"/>
             <rect x="11" y="2" width="7" height="7" rx="1.5" fill="currentColor" fill-opacity="0.3" stroke="currentColor" stroke-width="1.4"/>
