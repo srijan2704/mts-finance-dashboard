@@ -3,7 +3,33 @@
  * Maa Tara Store — business detail page (dark redesign).
  * Route: #/maa-tara-store
  */
+const STORE_PRODUCTS = [
+  { src: "assets/brand/maa-tara-store/aashirvaad-atta-30-Kg.webp", srcSm: "assets/brand/maa-tara-store/aashirvaad-atta-30-Kg.webp", alt: "Aashirvaad Atta 30 Kg", label: "Aashirvaad Atta 30 Kg" },
+  { src: "assets/brand/maa-tara-store/dhara-mustard-oil-5Litre.jpeg", srcSm: "assets/brand/maa-tara-store/dhara-mustard-oil-5Litre-sm.jpg", alt: "Dhara Mustard Oil 5L", label: "Dhara Mustard Oil 5L" },
+  { src: "assets/brand/maa-tara-store/dhara-mustard-oil.webp", srcSm: "assets/brand/maa-tara-store/dhara-mustard-oil.webp", alt: "Dhara Mustard Oil", label: "Dhara Mustard Oil" },
+  { src: "assets/brand/maa-tara-store/fortune-mustard-oil.webp", srcSm: "assets/brand/maa-tara-store/fortune-mustard-oil.webp", alt: "Fortune Mustard Oil", label: "Fortune Mustard Oil" },
+  { src: "assets/brand/maa-tara-store/healthy-tasty-mustard-oil.webp", srcSm: "assets/brand/maa-tara-store/healthy-tasty-mustard-oil.webp", alt: "Healthy Tasty Mustard Oil", label: "Healthy Tasty Mustard Oil" },
+  { src: "assets/brand/maa-tara-store/healthy-tasty-refined-oil.jpeg", srcSm: "assets/brand/maa-tara-store/healthy-tasty-refined-oil-sm.jpg", alt: "Healthy Tasty Refined Oil", label: "Healthy Tasty Refined Oil" },
+  { src: "assets/brand/maa-tara-store/india-gate-20-kg-bag.webp", srcSm: "assets/brand/maa-tara-store/india-gate-20-kg-bag.webp", alt: "India Gate 20 Kg Bag", label: "India Gate 20 Kg Bag" },
+  { src: "assets/brand/maa-tara-store/india-gate-white-sella-rice.jpeg", srcSm: "assets/brand/maa-tara-store/india-gate-white-sella-rice-sm.jpg", alt: "India Gate White Sella Rice", label: "India Gate White Sella Rice" },
+  { src: "assets/brand/maa-tara-store/ladoshri-24-carat-rice.jpeg", srcSm: "assets/brand/maa-tara-store/ladoshri-24-carat-rice-sm.jpg", alt: "Ladoshri 24 Carat Rice", label: "Ladoshri 24 Carat Rice" },
+  { src: "assets/brand/maa-tara-store/mangal-1-litre-pouch.webp", srcSm: "assets/brand/maa-tara-store/mangal-1-litre-pouch.webp", alt: "Mangal 1 Litre Pouch", label: "Mangal 1 Litre Pouch" },
+  { src: "assets/brand/maa-tara-store/nature-fresh-refined-oil.jpeg", srcSm: "assets/brand/maa-tara-store/nature-fresh-refined-oil-sm.jpg", alt: "Nature Fresh Refined Oil", label: "Nature Fresh Refined Oil" },
+  { src: "assets/brand/maa-tara-store/sharda-rice-25-kg-bag.jpeg", srcSm: "assets/brand/maa-tara-store/sharda-rice-25-kg-bag-sm.jpg", alt: "Sharda Rice 25 Kg Bag", label: "Sharda Rice 25 Kg Bag" },
+  { src: "assets/brand/maa-tara-store/sugar.jpeg", srcSm: "assets/brand/maa-tara-store/sugar-sm.jpg", alt: "Premium Sugar", label: "Premium Sugar" },
+  { src: "assets/brand/maa-tara-store/zabreen-biryani-rice.jpeg", srcSm: "assets/brand/maa-tara-store/zabreen-biryani-rice-sm.jpg", alt: "Zabreen Biryani Rice", label: "Zabreen Biryani Rice" },
+];
 
+function renderStoreProduct(img) {
+  return `
+    <div class="dp-product-card">
+      <div class="dp-product-img-wrap">
+        <img src="${img.srcSm}" srcset="${img.srcSm} 400w, ${img.src} 800w" sizes="(max-width: 600px) 400px, 800px" alt="${img.alt}" class="dp-product-img" loading="lazy" decoding="async"/>
+      </div>
+      <div class="dp-product-label">${img.label}</div>
+    </div>
+  `;
+}
 function renderMaaTaraStorePage() {
   return `
     <div class="dp-root" style="--dp-accent-rgb:26,111,207; --dp-orb-a:#1a6fcf; --dp-orb-b:#0e3a6e;">
@@ -20,7 +46,7 @@ function renderMaaTaraStorePage() {
           <svg viewBox="0 0 20 20" fill="none">
             <path d="M13 4L7 10l6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          Group Home
+          Home
         </a>
         <div class="dp-nav-brand">
           <img src="assets/brand/mts-brand-mark.svg" alt="" class="dp-nav-logo" aria-hidden="true"/>
@@ -91,6 +117,17 @@ function renderMaaTaraStorePage() {
             <li>Rice Bran Oil &amp; Palmolein Oil</li>
             <li>Other edible oils and allied food items</li>
           </ul>
+        </section>
+
+        <!-- Product Portfolio -->
+        <section class="dp-section">
+          <h2 class="dp-section-title">Product Portfolio</h2>
+          <p class="dp-section-body">
+            A diverse range of premium wholesale commodities distributed to retailers and sub-wholesalers across the region.
+          </p>
+          <div class="dp-product-scroll-row">
+            ${STORE_PRODUCTS.map(renderStoreProduct).join("")}
+          </div>
         </section>
 
         <!-- Footer -->

@@ -20,7 +20,7 @@ function renderMaaTaraTowerPage() {
           <svg viewBox="0 0 20 20" fill="none">
             <path d="M13 4L7 10l6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          Group Home
+          Home
         </a>
         <div class="dp-nav-brand">
           <img src="assets/brand/mts-brand-mark.svg" alt="" class="dp-nav-logo" aria-hidden="true"/>

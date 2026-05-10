@@ -698,7 +698,7 @@
   gap: 10px;
   background: var(--card-gradient);
   border-radius: 18px;
-  padding: 18px 18px 16px;
+  padding: 18px 18px 50px;
   text-decoration: none;
   color: #fff;
   overflow: hidden;
@@ -859,7 +859,9 @@
 }
 
 .gh-card-cta {
-  margin-left: auto;
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
   font-size: 13px;
   font-weight: 800;
   color: rgba(255, 255, 255, 0.75);
@@ -1689,6 +1691,26 @@
   margin-top: 8px;
 }
 
+.dp-product-scroll-row {
+  display: flex;
+  overflow-x: auto;
+  gap: 16px;
+  padding-bottom: 16px;
+  margin-top: 8px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.dp-product-scroll-row::-webkit-scrollbar {
+  display: none;
+}
+.dp-product-scroll-row .dp-product-card {
+  flex: 0 0 240px;
+  scroll-snap-align: start;
+}
+
+
 .dp-product-card {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1703,6 +1725,12 @@
   border-color: rgba(var(--dp-accent-rgb), 0.4);
 }
 
+@keyframes dpSkeletonPulseWhite {
+  0% { background-color: rgba(255, 255, 255, 0.85); }
+  50% { background-color: rgba(255, 255, 255, 1); }
+  100% { background-color: rgba(255, 255, 255, 0.85); }
+}
+
 .dp-product-img-wrap {
   background: rgba(255, 255, 255, 0.95);
   display: flex;
@@ -1710,6 +1738,7 @@
   justify-content: center;
   padding: 16px;
   height: 175px;
+  animation: dpSkeletonPulseWhite 1.5s ease-in-out infinite alternate;
 }
 
 .dp-product-img {
@@ -1741,6 +1770,12 @@
   margin-top: 12px;
 }
 
+@keyframes dpSkeletonPulseDark {
+  0% { background-color: rgba(255, 255, 255, 0.03); }
+  50% { background-color: rgba(255, 255, 255, 0.09); }
+  100% { background-color: rgba(255, 255, 255, 0.03); }
+}
+
 .dp-gallery-item {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1750,6 +1785,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: dpSkeletonPulseDark 1.5s ease-in-out infinite alternate;
 }
 
 .dp-gallery-media {

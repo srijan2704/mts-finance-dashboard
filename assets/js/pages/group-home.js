@@ -20,8 +20,8 @@ const COMPANIES = [
     accentRgb: "26, 111, 207",
     badge: "#3b82f6",
     stats: [
-      { label: "Commodities", value: "10+" },
-      { label: "License", value: "Wholesale" },
+      { label: "Commodities", value: "20+" },
+      { label: "Quality", value: "Premium" },
     ],
     icon: `<svg viewBox="0 0 56 56" fill="none">
       <rect width="56" height="56" rx="16" fill="rgba(255,255,255,0.12)"/>
@@ -42,7 +42,7 @@ const COMPANIES = [
     badge: "#22c55e",
     stats: [
       { label: "Brand", value: "Saloni" },
-      { label: "Segment", value: "B2B" },
+      { label: "Coverage", value: "5+ Districts" },
     ],
     icon: `<svg viewBox="0 0 56 56" fill="none">
       <rect width="56" height="56" rx="16" fill="rgba(255,255,255,0.12)"/>
@@ -65,7 +65,7 @@ const COMPANIES = [
     badge: "#f59e0b",
     stats: [
       { label: "Area", value: "25K+ sqft" },
-      { label: "Weighbridge", value: "✓ Yes" },
+      { label: "Weighbridge", value: "Available" },
     ],
     icon: `<svg viewBox="0 0 56 56" fill="none">
       <rect width="56" height="56" rx="16" fill="rgba(255,255,255,0.12)"/>
@@ -180,12 +180,12 @@ function renderGroupHomePage() {
               <circle cx="6" cy="6" r="4" fill="#22c55e"/>
               <circle cx="6" cy="6" r="2" fill="#fff"/>
             </svg>
-            Since 1989 · Diversified · Trusted
+            Trusted Since 1989
           </div>
 
           <h1 class="gh-hero-title">
-            Four Businesses.<br/>
-            <span class="gh-hero-title-accent">One Vision.</span>
+            One Vision.<br/>
+            <span class="gh-hero-title-accent">One Mission.</span>
           </h1>
           <p class="gh-hero-subtitle">
             A diversified business house operating across wholesale commodity trading,

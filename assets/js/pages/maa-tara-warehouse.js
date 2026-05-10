@@ -20,7 +20,7 @@ function renderMaaTaraWarehousePage() {
           <svg viewBox="0 0 20 20" fill="none">
             <path d="M13 4L7 10l6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          Group Home
+          Home
         </a>
         <div class="dp-nav-brand">
           <img src="assets/brand/mts-brand-mark.svg" alt="" class="dp-nav-logo" aria-hidden="true"/>
@@ -93,10 +93,10 @@ function renderMaaTaraWarehousePage() {
           </p>
           <div class="dp-gallery-grid">
             <div class="dp-gallery-item" style="cursor: pointer;" onclick="openWarehouseLightbox('image', 'assets/brand/maa-tara-warehouse/warehouse-1.jpg')">
-              <img src="assets/brand/maa-tara-warehouse/warehouse-1.jpg" alt="Warehouse Facility View 1" class="dp-gallery-media" loading="lazy" />
+              <img src="assets/brand/maa-tara-warehouse/warehouse-1-sm.jpg" srcset="assets/brand/maa-tara-warehouse/warehouse-1-sm.jpg 600w, assets/brand/maa-tara-warehouse/warehouse-1-md.jpg 1200w" sizes="(max-width: 768px) 100vw, 33vw" alt="Warehouse Facility View 1" class="dp-gallery-media" loading="lazy" decoding="async"/>
             </div>
             <div class="dp-gallery-item" style="cursor: pointer;" onclick="openWarehouseLightbox('image', 'assets/brand/maa-tara-warehouse/warehouse-2.JPG')">
-              <img src="assets/brand/maa-tara-warehouse/warehouse-2.JPG" alt="Warehouse Facility View 2" class="dp-gallery-media" loading="lazy" />
+              <img src="assets/brand/maa-tara-warehouse/warehouse-2-sm.jpg" srcset="assets/brand/maa-tara-warehouse/warehouse-2-sm.jpg 600w, assets/brand/maa-tara-warehouse/warehouse-2-md.jpg 1200w" sizes="(max-width: 768px) 100vw, 33vw" alt="Warehouse Facility View 2" class="dp-gallery-media" loading="lazy" decoding="async"/>
             </div>
             <div class="dp-gallery-item dp-gallery-video" style="cursor: pointer;" onclick="openWarehouseLightbox('video', 'assets/brand/maa-tara-warehouse/warehouse-video.mp4')">
               <video src="assets/brand/maa-tara-warehouse/warehouse-video.mp4" class="dp-gallery-media" preload="metadata" muted></video>
