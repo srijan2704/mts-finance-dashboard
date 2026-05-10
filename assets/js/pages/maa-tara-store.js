@@ -29,7 +29,7 @@ function renderStoreProduct(img) {
   return `
     <div class="dp-product-card">
       <div class="dp-product-img-wrap">
-        <img src="${img.src}" alt="${img.alt}" class="dp-product-img" loading="lazy" decoding="async"/>
+        <img src="${img.src}" alt="${img.alt}" class="dp-product-img" loading="eager" decoding="async"/>
       </div>
       <div class="dp-product-label">${img.label}</div>
     </div>

@@ -15,7 +15,7 @@ function renderProductCard(img) {
   return `
     <div class="dp-product-card">
       <div class="dp-product-img-wrap">
-        <img src="${img.src}" alt="${img.alt}" class="dp-product-img" loading="lazy" decoding="async"/>
+        <img src="${img.src}" alt="${img.alt}" class="dp-product-img" loading="eager" decoding="async"/>
       </div>
       <div class="dp-product-label">${img.label}</div>
     </div>
@@ -90,7 +90,7 @@ function renderMaaTaraSalesPage() {
             src="assets/brand/maa-tara-sales/images-6.jpeg"
             alt="Saloni brand ambassador campaign"
             class="dp-feature-img"
-            loading="lazy"
+            loading="eager"
           />
           <div class="dp-feature-overlay">
             <div class="dp-feature-badge">Official Distributor</div>
