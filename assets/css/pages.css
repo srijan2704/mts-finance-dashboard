@@ -255,11 +255,13 @@
   max-height: 92dvh;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-  background: var(--panel);
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 14px;
-  box-shadow: var(--shadow);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
 }
 
 .variant-modal-card {
@@ -1255,6 +1257,8 @@
   filter: blur(90px);
   opacity: 0.22;
   animation: orbDrift 20s ease-in-out infinite alternate;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .dp-orb-1 {
